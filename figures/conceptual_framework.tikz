@@ -1,0 +1,248 @@
+% TikZ source for Conceptual Framework of Decision-Boundary Geometry
+% Can be included via \input{../figures/conceptual_framework.tikz} or compiled standalone
+
+\begin{tikzpicture}[
+    font=\small,
+    >=Stealth,
+    panel/.style={
+        draw=panelborder,
+        fill=panelbg,
+        rounded corners=4pt,
+        line width=0.8pt
+    },
+    boxcard/.style={
+        rounded corners=3pt,
+        line width=0.6pt,
+        inner sep=3.8pt,
+        font=\scriptsize
+    },
+    state/.style={
+        circle,
+        draw=accentblue,
+        fill=white,
+        line width=1.0pt,
+        minimum size=18pt,
+        inner sep=1pt,
+        font=\scriptsize\bfseries
+    }
+]
+
+% Panel Dimensions & Grid Layout
+\def\PW{6.0}   % Panel Width
+\def\PH{10.8}  % Panel Height (Extra spacious layout)
+\def\GAP{0.35} % Gap between panels
+
+% ==============================================================================
+% PANEL (A): DIRECTIONAL GEOMETRY & OBJECTIVE MISMATCH
+% ==============================================================================
+\begin{scope}[shift={(0,0)}]
+    % Background Panel
+    \draw[panel] (0,0) rectangle (\PW, \PH);
+    \node[font=\bfseries\footnotesize, text=primaryblue, anchor=north] at (\PW/2, \PH-0.25) {(a) Directional Geometry \& Mismatch};
+
+    % Inner Coordinate for True Nominal State s'
+    \coordinate (O) at (2.8, 5.9);
+    
+    % Clip boundary for geometric regions
+    \begin{scope}
+        \clip (0.2, 1.6) rectangle (\PW-0.2, \PH-0.85);
+        
+        % Region R(a*) - Optimal Region (Top-Left)
+        \fill[safegreenbg] (0.2, 1.6) -- (0.2, \PH-0.85) -- (\PW-0.2, \PH-0.85) -- (0.8, 1.6) -- cycle;
+        
+        % Region R(a^(2)) - Suboptimal Region (Bottom-Right)
+        \fill[dangerredbg] (0.8, 1.6) -- (\PW-0.2, \PH-0.85) -- (\PW-0.2, 1.6) -- cycle;
+        
+        % Decision Boundary Sigma Line
+        \draw[dangerred, dashed, line width=1.3pt] (0.4, 1.2) -- (5.6, 9.8);
+            
+        % Prediction Error Ball Contour (||delta P||_TV = epsilon)
+        \draw[midgray, dashed, line width=0.85pt] (O) circle (1.65cm);
+    \end{scope}
+
+    % Boundary Label
+    \node[font=\scriptsize\bfseries, text=dangerred, rotate=46, anchor=south] at (4.35, 7.8) {Boundary $\Sigma: Q(a^*) = Q(a^{(2)})$};
+    \node[font=\scriptsize\itshape, text=darkslate, anchor=west] at ($(O)+(0.95, 1.35)$) {$\|\delta P\|_{\mathrm{TV}} = \varepsilon$};
+
+    % Region Text Labels
+    \node[anchor=north west, align=left, font=\scriptsize] at (0.32, \PH-0.95) {
+        \textcolor{safegreen}{\textbf{Region $\mathcal{R}(a^*)$}}\\
+        \textcolor{darkslate}{$\pi^*(s) = a^*$ (Optimal)}
+    };
+    \node[anchor=south east, align=right, font=\scriptsize] at (\PW-0.32, 1.8) {
+        \textcolor{dangerred}{\textbf{Region $\mathcal{R}(a^{(2)})$}}\\
+        \textcolor{darkslate}{$\pi(s) = a^{(2)}$ (Suboptimal)}
+    };
+
+    % True Nominal State Dot
+    \fill[primaryblue] (O) circle (3.0pt) node[anchor=north east, font=\scriptsize\bfseries, text=primaryblue, yshift=-1pt, xshift=1pt] {True $\mathbf{s}'$};
+
+    % Expansive Error Vector
+    \draw[->, safegreen, line width=1.7pt] (O) -- ++(140:1.65) coordinate (EXP_END);
+    \node[boxcard, fill=white, draw=safegreenborder, text=safegreen, anchor=south east, align=left] at ($(EXP_END)+(0.25, 0.05)$) {
+        \textbf{Expansive ($B < 0$)}\\
+        Safe ($C_i = 0$) $\checkmark$
+    };
+
+    % Compressive Error Vector (Anchored safely inside panel)
+    \draw[->, dangerred, line width=1.7pt] (O) -- ++(-38:1.65) coordinate (COMP_END);
+    \node[boxcard, fill=white, draw=dangerredborder, text=dangerred, anchor=north, align=center] at ($(COMP_END)+(-0.15, -0.15)$) {
+        \textbf{Compressive ($B > 1$)}\\
+        Action Flip ($Z=1$) $\boldsymbol{\times}$
+    };
+
+    % Bottom Takeaway Summary Box
+    \node[boxcard, fill=white, draw=panelborder, anchor=south, minimum width=\PW cm - 0.4cm, inner sep=4pt] at (\PW/2, 0.3) {
+        \parbox{5.4cm}{\centering \scriptsize \textbf{Objective Mismatch:} Equal prediction error $\|\delta P\|_{\mathrm{TV}}$ yields diametrically opposite decision outcomes ($C_i = 0$ safe vs. $Z = 1$ flip).}
+    };
+\end{scope}
+
+% ==============================================================================
+% PANEL (B): DECISION MARGIN GAUGE & THE FOUR REGIMES
+% ==============================================================================
+\begin{scope}[shift={(\PW+\GAP, 0)}]
+    % Background Panel
+    \draw[panel] (0,0) rectangle (\PW, \PH);
+    \node[font=\bfseries\footnotesize, text=primaryblue, anchor=north] at (\PW/2, \PH-0.25) {(b) Margin Gauge \& Four Regimes};
+
+    % Top 1D Pressure Spectrum Gauge
+    \def\GY{9.1}
+    \draw[->, line width=0.9pt, darkslate] (0.4, \GY) -- (\PW-0.4, \GY) node[anchor=west, font=\scriptsize\bfseries] {$B(s)$};
+    
+    % Pressure Colored Bars on Gauge
+    \fill[safegreen, opacity=0.3] (0.6, \GY-0.12) rectangle (1.8, \GY+0.12);
+    \fill[warnorange, opacity=0.3] (1.8, \GY-0.12) rectangle (3.8, \GY+0.12);
+    \fill[dangerred, opacity=0.3] (3.8, \GY-0.12) rectangle (5.3, \GY+0.12);
+    \draw[line width=0.5pt, darkslate] (0.6, \GY-0.12) rectangle (5.3, \GY+0.12);
+
+    % Ticks on Gauge
+    \draw[line width=0.9pt, darkslate] (1.8, \GY-0.18) -- (1.8, \GY+0.18) node[above=2pt, font=\tiny\bfseries] {$B=0$};
+    \draw[line width=1.1pt, dangerred] (3.8, \GY-0.2) -- (3.8, \GY+0.2) node[above=2pt, font=\tiny\bfseries, text=dangerred] {$B=1.0$ (Tie $\Sigma$)};
+
+    \node[font=\tiny\bfseries, text=safegreen] at (1.2, \GY-0.3) {$B<0$};
+    \node[font=\tiny\bfseries, text=warnorange] at (2.8, \GY-0.3) {$0\le B<1$};
+    \node[font=\tiny\bfseries, text=dangerred] at (4.55, \GY-0.3) {$B>1.0$};
+
+    % Four Regime Cards (Explicit Y coordinates with generous spacing)
+    \def\CARDW{5.4cm}
+    
+    % Regime 1
+    \node[boxcard, fill=safegreenbg, draw=safegreenborder, anchor=north] (R1) at (\PW/2, 8.2) {
+        \parbox{\CARDW}{
+            \textcolor{safegreen}{\textbf{1. Expansive Regime ($B < 0$)}} \hfill \textcolor{safegreen}{\textbf{[Safe $\checkmark$]}}\\
+            \textcolor{darkslate}{$\Delta m > 0 \implies m_{\widehat{P}} > m_P$: Margin widened, $a^*$ reinforced.}
+        }
+    };
+
+    % Regime 2
+    \node[boxcard, fill=warnyellowbg, draw=warnyellowborder, below=0.22cm of R1] (R2) {
+        \parbox{\CARDW}{
+            \textcolor{warnorange}{\textbf{2. Compressive Sub-threshold ($0 \le B < 1$)}} \hfill \textcolor{warnorange}{\textbf{[Intact $\approx$]}}\\
+            \textcolor{darkslate}{$-m_P < \Delta m \le 0$: Margin narrowed, optimal action $a^*$ preserved.}
+        }
+    };
+
+    % Regime 3
+    \node[boxcard, fill=tieorangebg, draw=tieorangeborder, below=0.22cm of R2] (R3) {
+        \parbox{\CARDW}{
+            \textcolor{warnorange}{\textbf{3. Critical Decision Tie ($B = 1.0$)}} \hfill \textcolor{warnorange}{\textbf{[Boundary $\Sigma$]}}\\
+            \textcolor{darkslate}{$\Delta m = -m_P$: Degenerate tie $\widehat{Q}(a^*) = \widehat{Q}(a^{(2)})$. On boundary $\Sigma$.}
+        }
+    };
+
+    % Regime 4
+    \node[boxcard, fill=dangerredbg, draw=dangerredborder, below=0.22cm of R3] (R4) {
+        \parbox{\CARDW}{
+            \textcolor{dangerred}{\textbf{4. Strict Boundary Crossing ($B > 1.0$)}} \hfill \textcolor{dangerred}{\textbf{[Action Flip $\boldsymbol{\times}$]}}\\
+            \textcolor{darkslate}{$\Delta m < -m_P \implies \widehat{Q}(a^{(2)}) > \widehat{Q}(a^*)$: Action flip $Z_{\mathrm{cross}}=1$.}
+        }
+    };
+
+    % Connective Pressure Arrows between cards
+    \draw[->, line width=0.6pt, darkslate] (R1.south) -- (R2.north);
+    \draw[->, line width=0.6pt, darkslate] (R2.south) -- (R3.north);
+    \draw[->, line width=0.6pt, darkslate] (R3.south) -- (R4.north);
+
+    % Bottom Takeaway Summary Box
+    \node[boxcard, fill=white, draw=panelborder, anchor=south, minimum width=\PW cm - 0.4cm, inner sep=4pt] at (\PW/2, 0.3) {
+        \parbox{5.4cm}{\centering \scriptsize \textbf{Diagnostic Metric:} $B(s) = -\Delta m(s)/m_P(s)$ acts as the sharp causal order parameter for discrete control failure.}
+    };
+\end{scope}
+
+% ==============================================================================
+% PANEL (C): SPATIAL CORRIDOR & BELLMAN PROPAGATION BOTTLENECK
+% ==============================================================================
+\begin{scope}[shift={(2*\PW+2*\GAP, 0)}]
+    % Background Panel
+    \draw[panel] (0,0) rectangle (\PW, \PH);
+    \node[font=\bfseries\footnotesize, text=primaryblue, anchor=north] at (\PW/2, \PH-0.25) {(c) Spatial Corridor \& Propagation};
+
+    % Global Value Backup Annotation
+    \node[font=\scriptsize\bfseries, text=backupcolor, anchor=north] at (\PW/2, \PH-0.75) {Global Backup: $V(s) \leftarrow \max_a [r + \gamma \mathbb{E} V(s')]$};
+
+    % State Nodes with proper named handles
+    \node[state] (N0) at (0.8, 7.6) {$s_0$};
+    \node[state] (N1) at (2.2, 7.6) {$s_1$};
+    \node[state] (N2) at (3.6, 7.6) {$s_2$};
+    \node[state, draw=dangerred, fill=dangerredbg] (NC) at (5.0, 7.6) {\textcolor{dangerred}{$s_{\mathrm{cross}}$}};
+
+    % State Descriptive Labels cleanly positioned BELOW the circle nodes
+    \node[font=\tiny, text=darkslate, below=3pt of N0] {Start};
+    \node[font=\tiny, text=darkslate, below=3pt of N1] {Corridor};
+    \node[font=\tiny, text=darkslate, below=3pt of N2] {Corridor};
+    \node[font=\tiny\bfseries, text=dangerred, below=3pt of NC] {Boundary};
+
+    % Bellman Backup Curved Arc (Backward from top of NC to top of N0)
+    \draw[->, backupcolor, dashed, line width=1.1pt] 
+        (NC.north) to[out=135, in=45] (N0.north);
+
+    % Forward Transition Arrows between nodes
+    \draw[->, line width=1.1pt, accentblue] (N0) -- (N1) node[midway, above=1pt, font=\tiny] {$w_0 \downarrow$};
+    \draw[->, line width=1.1pt, accentblue] (N1) -- (N2) node[midway, above=1pt, font=\tiny] {$w_1 \downarrow$};
+    \draw[->, line width=1.3pt, dangerred] (N2) -- (NC) node[midway, above=1pt, font=\tiny, text=dangerred] {$w_{\mathrm{cross}} \uparrow\uparrow$};
+
+    % Causal Degradation Pipeline (4 Steps in 2x2 Grid)
+    \def\BW{2.55cm}
+    \def\BH{0.95cm}
+
+    % Step 1
+    \node[boxcard, fill=dangerredbg, draw=dangerredborder, minimum width=\BW, minimum height=\BH, text width=2.35cm, align=left] 
+        (B1) at (1.55, 5.0) {
+            \textbf{\textcolor{dangerred}{1. Boundary Upweight}}\\
+            $w(s_{\mathrm{cross}}) \uparrow$ $(\lambda > 0)$
+        };
+
+    % Step 2
+    \node[boxcard, fill=warnyellowbg, draw=warnyellowborder, minimum width=\BW, minimum height=\BH, text width=2.35cm, align=left] 
+        (B2) at (4.4, 5.0) {
+            \textbf{\textcolor{warnorange}{2. Corridor Depletion}}\\
+            $w(s_1, s_2) \downarrow$ $(\sum w_i = N)$
+        };
+
+    % Step 3
+    \node[boxcard, fill=backupbg, draw=backupcolor!60, minimum width=\BW, minimum height=\BH, text width=2.35cm, align=left] 
+        (B3) at (4.4, 2.9) {
+            \textbf{\textcolor{backupcolor}{3. Value Distortion}}\\
+            $\widehat{V}(s')$ backup noise
+        };
+
+    % Step 4
+    \node[boxcard, fill=dangerredbg, draw=dangerredborder, minimum width=\BW, minimum height=\BH, text width=2.35cm, align=left] 
+        (B4) at (1.55, 2.9) {
+            \textbf{\textcolor{dangerred}{4. Upstream Flips}}\\
+            Action flips at $s_0 \downarrow$
+        };
+
+    % Causal Sequence Arrows between Step Cards
+    \draw[->, line width=0.8pt, darkslate] (B1.east) -- (B2.west);
+    \draw[->, line width=0.8pt, darkslate] (B2.south) -- (B3.north);
+    \draw[->, line width=0.8pt, darkslate] (B3.west) -- (B4.east);
+    \draw[->, line width=0.8pt, dangerred, dashed] (B4.north) -- (B1.south);
+
+    % Bottom Takeaway Summary Box
+    \node[boxcard, fill=white, draw=panelborder, anchor=south, minimum width=\PW cm - 0.4cm, inner sep=4pt] at (\PW/2, 0.3) {
+        \parbox{5.4cm}{\centering \scriptsize \textbf{Bottleneck Mechanism:} Sample reallocation starves corridor dynamics, propagating value errors upstream to invert policies at $s_0$.}
+    };
+\end{scope}
+
+\end{tikzpicture}

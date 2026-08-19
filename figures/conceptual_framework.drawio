@@ -1,0 +1,224 @@
+<mxfile host="Electron" modified="2026-08-18T00:00:00.000Z" agent="Mozilla/5.0" version="21.0.0" type="device">
+  <diagram id="drl_boundary_framework" name="Decision-Boundary Geometry Framework">
+    <mxGraphModel dx="1200" dy="800" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="1" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        
+        <!-- ================= PANEL A: OBJECTIVE MISMATCH ================= -->
+        <mxCell id="panel_a" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="40" y="40" width="340" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="title_a" value="&lt;b&gt;(a) Directional Geometry vs. Loss Mismatch&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#1f4e79;" vertex="1" parent="1">
+          <mxGeometry x="50" y="50" width="320" height="30" as="geometry" />
+        </mxCell>
+        
+        <!-- SHADED REGIONS -->
+        <mxCell id="region_opt" value="&lt;font color=&quot;#1b5e20&quot;&gt;&lt;b&gt;Region \(\mathcal{R}(a^*)\)&lt;/b&gt;&lt;br&gt;\(\pi^*(s) = a^*\) (Optimal)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#a5d6a7;strokeWidth=1;align=center;verticalAlign=top;spacingTop=6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="60" y="85" width="145" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="region_sub" value="&lt;font color=&quot;#b71c1c&quot;&gt;&lt;b&gt;Region \(\mathcal{R}(a^{(2)})\)&lt;/b&gt;&lt;br&gt;\(\pi(s) = a^{(2)}\) (Suboptimal)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#ffcdd2;strokeWidth=1;align=center;verticalAlign=bottom;spacingBottom=6;fontSize=9;" vertex="1" parent="1">
+          <mxGeometry x="215" y="225" width="145" height="150" as="geometry" />
+        </mxCell>
+        
+        <!-- DECISION BOUNDARY LINE -->
+        <mxCell id="decision_boundary" value="" style="endArrow=none;html=1;strokeColor=#d9534f;strokeWidth=3;dashed=1;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="60" y="360" as="sourcePoint" />
+            <mxPoint x="360" y="100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="boundary_label" value="&lt;font color=&quot;#d9534f&quot;&gt;&lt;b&gt;Boundary &amp;Sigma;: \(Q(a^*) = Q(a^{(2)})\)&lt;/b&gt;&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=8.5;rotation=-40;" vertex="1" parent="1">
+          <mxGeometry x="200" y="125" width="160" height="25" as="geometry" />
+        </mxCell>
+
+        <!-- EQUAL PREDICTION LOSS CIRCLE -->
+        <mxCell id="err_sphere" value="" style="ellipse;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#78909c;strokeWidth=1.5;dashed=1;" vertex="1" parent="1">
+          <mxGeometry x="110" y="150" width="180" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="sphere_label" value="&lt;font color=&quot;#37474f&quot;&gt;\(\|\delta P\|_{\mathrm{TV}} = \epsilon\)&lt;/font&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontSize=8;fontStyle=2;" vertex="1" parent="1">
+          <mxGeometry x="220" y="165" width="90" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- TRUE STATE WITH ROBOT AGENT ICON -->
+        <mxCell id="true_state" value="&lt;b&gt;True \(s'\)&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#1f4e79;fontColor=#ffffff;strokeColor=#1f4e79;strokeWidth=2;fontSize=8;verticalAlign=bottom;" vertex="1" parent="1">
+          <mxGeometry x="180" y="220" width="40" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="robot_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%231f4e79%22%3E%3Cpath%20d%3D%22M12%202a2%202%200%200%201%202%202v1h4a2%202%200%200%201%202%202v10a2%202%200%200%201-2%202H6a2%202%200%200%201-2-2V7a2%202%200%200%201%202-2h4V4a2%202%200%200%201%202-2zm-3%208a1.5%201.5%200%201%200%200%203%201.5%201.5%200%200%200%200-3zm6%200a1.5%201.5%200%201%200%200%203%201.5%201.5%200%200%200%200-3zm-5%205a1%201%200%200%200%200%202h4a1%201%200%200%200%200-2H10z%22/%3E%3C/svg%3E;verticalLabelPosition=bottom;verticalAlign=top;" vertex="1" parent="1">
+          <mxGeometry x="190" y="225" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <!-- EXPANSIVE ERROR WITH SHIELD ICON -->
+        <mxCell id="expansive_err" value="" style="endArrow=classic;html=1;strokeColor=#2e7d32;strokeWidth=3;fillColor=#2e7d32;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="185" y="225" as="sourcePoint" />
+            <mxPoint x="135" y="165" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="shield_badge" value="&lt;b&gt;Expansive (\(B &amp;lt; 0\))&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#2e7d32&quot;&gt;&lt;b&gt;Safe (\(C_i = 0\))&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#2e7d32;fontSize=7.5;spacingLeft=18;align=left;" vertex="1" parent="1">
+          <mxGeometry x="65" y="140" width="115" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="shield_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%232e7d32%22%3E%3Cpath%20d%3D%22M12%201L3%205v6c0%205.55%203.84%2010.74%209%2012%205.16-1.26%209-6.45%209-12V5l-9-4zm-2%2015l-4-4%201.41-1.41L10%2013.17l6.59-6.59L18%208l-8%208z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="70" y="148" width="18" height="18" as="geometry" />
+        </mxCell>
+
+        <!-- COMPRESSIVE ERROR WITH WARNING ICON -->
+        <mxCell id="compressive_err" value="" style="endArrow=classic;html=1;strokeColor=#c62828;strokeWidth=3;fillColor=#c62828;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="215" y="255" as="sourcePoint" />
+            <mxPoint x="265" y="315" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="warn_badge" value="&lt;b&gt;Compressive (\(B &amp;gt; 1\))&lt;/b&gt;&lt;br&gt;&lt;font color=&quot;#c62828&quot;&gt;&lt;b&gt;Action Flip (\(Z=1\))&lt;/b&gt;&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#c62828;fontSize=7.5;spacingLeft=18;align=left;" vertex="1" parent="1">
+          <mxGeometry x="225" y="305" width="130" height="35" as="geometry" />
+        </mxCell>
+        <mxCell id="warn_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23c62828%22%3E%3Cpath%20d%3D%22M1%2021h22L12%202%201%2021zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="230" y="313" width="18" height="18" as="geometry" />
+        </mxCell>
+
+        <mxCell id="mismatch_note" value="&lt;b&gt;Objective Mismatch:&lt;/b&gt; Equal prediction error \(\|\delta P\|_{\mathrm{TV}}\), but opposite control outcomes." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ced4da;fontSize=7.8;align=left;spacingLeft=6;" vertex="1" parent="1">
+          <mxGeometry x="50" y="380" width="320" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ================= PANEL B: FOUR REGIMES & GAUGE ================= -->
+        <mxCell id="panel_b" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="400" y="40" width="340" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="title_b" value="&lt;b&gt;(b) Decision Margin Gauge &amp;amp; Four Regimes&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#1f4e79;" vertex="1" parent="1">
+          <mxGeometry x="410" y="50" width="320" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- CONTINUOUS GAUGE RULER -->
+        <mxCell id="gauge_icon_top" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%2300838f%22%3E%3Cpath%20d%3D%22M12%204a8%208%200%200%200-8%208c0%202.21.89%204.21%202.34%205.66l1.42-1.42A5.96%205.96%200%200%201%206%2012a6%206%200%200%201%2012%200c0%201.66-.67%203.16-1.76%204.24l1.42%201.42A7.96%207.96%200%200%200%2020%2012a8%208%200%200%200-8-8zm-1%204v4.59l3.71%202.22.79-1.28-3-1.78V8h-1.5z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="415" y="80" width="22" height="22" as="geometry" />
+        </mxCell>
+        <mxCell id="gauge_exp" value="&lt;b&gt;B &amp;lt; 0&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#c8e6c9;strokeColor=#2e7d32;fontSize=8;fontColor=#1b5e20;" vertex="1" parent="1">
+          <mxGeometry x="445" y="80" width="80" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="gauge_sub" value="&lt;b&gt;0 &amp;le; B &amp;lt; 1&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fff9c4;strokeColor=#f57f17;fontSize=8;fontColor=#e65100;" vertex="1" parent="1">
+          <mxGeometry x="525" y="80" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="gauge_cross" value="&lt;b&gt;B &amp;gt; 1.0&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcdd2;strokeColor=#c62828;fontSize=8;fontColor=#b71c1c;" vertex="1" parent="1">
+          <mxGeometry x="620" y="80" width="95" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="gauge_needle" value="&lt;b&gt;Threshold B=1.0&lt;/b&gt; (Tie)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#000000;strokeWidth=1.5;align=center;fontSize=7.2;" vertex="1" parent="1">
+          <mxGeometry x="565" y="108" width="110" height="20" as="geometry" />
+        </mxCell>
+        
+        <!-- 4 REGIME CARDS WITH ICONS -->
+        <mxCell id="regime1" value="&lt;b&gt;1. Expansive Regime&lt;/b&gt; &lt;span style=&quot;float:right;&quot;&gt;\(B &amp;lt; 0\ (\Delta m &amp;gt; 0)\)&lt;/span&gt;&lt;br&gt;Margin widened; optimal action reinforced." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8f5e9;strokeColor=#2e7d32;fontSize=8;align=left;spacingLeft=26;" vertex="1" parent="1">
+          <mxGeometry x="420" y="138" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="reg1_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%232e7d32%22%3E%3Cpath%20d%3D%22M12%201L3%205v6c0%205.55%203.84%2010.74%209%2012%205.16-1.26%209-6.45%209-12V5l-9-4zm-2%2015l-4-4%201.41-1.41L10%2013.17l6.59-6.59L18%208l-8%208z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="426" y="152" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="regime2" value="&lt;b&gt;2. Compressive Sub-threshold&lt;/b&gt; &lt;span style=&quot;float:right;&quot;&gt;\(0 &amp;le; B &amp;lt; 1\)&lt;/span&gt;&lt;br&gt;Margin narrowed; optimal action preserved." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fffde7;strokeColor=#f57f17;fontSize=8;align=left;spacingLeft=26;" vertex="1" parent="1">
+          <mxGeometry x="420" y="195" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="reg2_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%2300838f%22%3E%3Cpath%20d%3D%22M12%204a8%208%200%200%200-8%208c0%202.21.89%204.21%202.34%205.66l1.42-1.42A5.96%205.96%200%200%201%206%2012a6%206%200%200%201%2012%200c0%201.66-.67%203.16-1.76%204.24l1.42%201.42A7.96%207.96%200%200%200%2020%2012a8%208%200%200%200-8-8zm-1%204v4.59l3.71%202.22.79-1.28-3-1.78V8h-1.5z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="426" y="209" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="regime3" value="&lt;b&gt;3. Exact Decision Tie&lt;/b&gt; &lt;span style=&quot;float:right;&quot;&gt;\(B = 1.0\ (\Delta m = -m)\)&lt;/span&gt;&lt;br&gt;Action-values tie: \(Q(a^*) = Q(a^{(2)})\)." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#e65100;fontSize=8;align=left;spacingLeft=26;" vertex="1" parent="1">
+          <mxGeometry x="420" y="252" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="reg3_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23e65100%22%3E%3Cpath%20d%3D%22M12%202a1%201%200%200%201%201%201v1.07A7.002%207.002%200%200%201%2019%2011v1h1a1%201%200%200%201%200%202h-1v5h2a1%201%200%200%201%200%202H3a1%201%200%200%201%200-2h2v-5H4a1%201%200%200%201%200-2h1v-1a7.002%207.002%200%200%201%206-6.93V3a1%201%200%200%201%201-1zm-5%209a5%205%200%200%200%2010%200V9.17A5.002%205.002%200%200%200%207%209.17V11zm-2%205v3h14v-3H5z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="426" y="266" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="regime4" value="&lt;b&gt;4. Strict Boundary Crossing&lt;/b&gt; &lt;span style=&quot;float:right;&quot;&gt;\(B &amp;gt; 1.0\)&lt;/span&gt;&lt;br&gt;&lt;b&gt;Action Inverted:&lt;/b&gt; Runner-up selected (\(Z_{\mathrm{cross}}=1\))." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828;fontSize=8;align=left;spacingLeft=26;" vertex="1" parent="1">
+          <mxGeometry x="420" y="309" width="300" height="52" as="geometry" />
+        </mxCell>
+        <mxCell id="reg4_icon" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23c62828%22%3E%3Cpath%20d%3D%22M16%2017.01V10h-2v7.01h-3L15%2021l4-3.99h-3zM9%203L5%206.99h3V14h2V6.99h3L9%203z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="426" y="323" width="20" height="20" as="geometry" />
+        </mxCell>
+
+        <mxCell id="formula_box" value="&lt;b&gt;Normalized Boundary Pressure:&lt;/b&gt; \(B(s) = -\frac{\Delta m(s)}{m_P(s)}\)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#ced4da;fontSize=8;align=center;" vertex="1" parent="1">
+          <mxGeometry x="420" y="370" width="300" height="35" as="geometry" />
+        </mxCell>
+
+        <!-- ================= PANEL C: BELLMAN BOTTLENECK ================= -->
+        <mxCell id="panel_c" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#dee2e6;strokeWidth=1.5;" vertex="1" parent="1">
+          <mxGeometry x="760" y="40" width="360" height="420" as="geometry" />
+        </mxCell>
+        <mxCell id="title_c" value="&lt;b&gt;(c) Spatial Corridor &amp;amp; Bellman Propagation Bottleneck&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=11;fontColor=#1f4e79;" vertex="1" parent="1">
+          <mxGeometry x="770" y="50" width="340" height="25" as="geometry" />
+        </mxCell>
+        
+        <!-- TRAJECTORY NODES -->
+        <mxCell id="node_s0" value="&lt;b&gt;\(s_0\)&lt;/b&gt;&lt;br&gt;Start" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#e3f2fd;strokeColor=#1f4e79;strokeWidth=2;fontSize=8;verticalAlign=bottom;" vertex="1" parent="1">
+          <mxGeometry x="775" y="85" width="45" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="icon_s0" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%231f4e79%22%3E%3Cpath%20d%3D%22M14.4%206L14%204H5v17h2v-7h5.6l.4%202h7V6h-5.6z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="789" y="88" width="16" height="16" as="geometry" />
+        </mxCell>
+
+        <mxCell id="node_s1" value="&lt;b&gt;\(s_1\)&lt;/b&gt;&lt;br&gt;Corridor" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffffff;strokeColor=#6c757d;strokeWidth=1.5;fontSize=7.5;" vertex="1" parent="1">
+          <mxGeometry x="855" y="85" width="45" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="node_s2" value="&lt;b&gt;\(s_2\)&lt;/b&gt;&lt;br&gt;Corridor" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffffff;strokeColor=#6c757d;strokeWidth=1.5;fontSize=7.5;" vertex="1" parent="1">
+          <mxGeometry x="935" y="85" width="45" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="node_scross" value="&lt;b&gt;\(s_{\mathrm{cross}}\)&lt;/b&gt;&lt;br&gt;Boundary" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fillColor=#ffebee;strokeColor=#d9534f;strokeWidth=2;fontSize=8;verticalAlign=bottom;" vertex="1" parent="1">
+          <mxGeometry x="1025" y="85" width="45" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="icon_scross" value="" style="shape=image;image=data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22%23c62828%22%3E%3Cpath%20d%3D%22M1%2021h22L12%202%201%2021zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z%22/%3E%3C/svg%3E;" vertex="1" parent="1">
+          <mxGeometry x="1039" y="88" width="16" height="16" as="geometry" />
+        </mxCell>
+        
+        <!-- FORWARD TRANSITIONS -->
+        <mxCell id="edge_01" value="\(w_i \downarrow\)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6c757d;strokeWidth=1.5;dashed=1;fontSize=7.5;" edge="1" parent="1" source="node_s0" target="node_s1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_12" value="\(w_i \downarrow\)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#6c757d;strokeWidth=1.5;dashed=1;fontSize=7.5;" edge="1" parent="1" source="node_s1" target="node_s2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge_2cross" value="\(w_i \uparrow\uparrow\)" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#d9534f;strokeWidth=2.5;fontSize=8;fontColor=#d9534f;" edge="1" parent="1" source="node_s2" target="node_scross">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- BELLMAN BACKUP ARROWS -->
+        <mxCell id="backup_arrow" value="&lt;font color=&quot;#6f42c1&quot;&gt;&lt;b&gt;Global Bellman Backup:&lt;/b&gt; \(V(s) \leftarrow \max_a [R + \gamma \sum P(s') V(s')]\)&lt;/font&gt;" style="curved=1;endArrow=classic;html=1;strokeColor=#6f42c1;strokeWidth=2.2;dashed=1;fontSize=8;" edge="1" parent="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1045" y="145" as="sourcePoint" />
+            <mxPoint x="795" y="145" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="920" y="185" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        
+        <!-- 4-STEP CAUSAL FAILURE FLOWCHART -->
+        <mxCell id="box_up" value="&lt;b&gt;1. Boundary Upweight&lt;/b&gt;&lt;br&gt;\(w(s_{\mathrm{cross}}) \uparrow\ (\lambda &amp;gt; 0)\)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#d9534f;fontSize=7.5;fontColor=#d9534f;" vertex="1" parent="1">
+          <mxGeometry x="775" y="210" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="box_down" value="&lt;b&gt;2. Corridor Downweight&lt;/b&gt;&lt;br&gt;\(w(s_{\mathrm{corr}}) \downarrow\ (\sum w_i = N)\)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff3e0;strokeColor=#e65100;fontSize=7.5;fontColor=#e65100;" vertex="1" parent="1">
+          <mxGeometry x="955" y="210" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="box_distort" value="&lt;b&gt;3. Value Distortion&lt;/b&gt;&lt;br&gt;\(\hat{V}(s')\) biased in backup" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ede7f6;strokeColor=#6f42c1;fontSize=7.5;fontColor=#6f42c1;" vertex="1" parent="1">
+          <mxGeometry x="955" y="290" width="150" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="box_flip" value="&lt;b&gt;4. Upstream Policy Flips&lt;/b&gt;&lt;br&gt;&lt;b&gt;New Action Flips at \(s_0 \downarrow\)&lt;/b&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffebee;strokeColor=#c62828;fontSize=7.5;fontColor=#c62828;" vertex="1" parent="1">
+          <mxGeometry x="775" y="290" width="150" height="50" as="geometry" />
+        </mxCell>
+        
+        <!-- FLOW ARROWS -->
+        <mxCell id="flow_12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#333333;strokeWidth=1.5;" edge="1" parent="1" source="box_up" target="box_down">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#333333;strokeWidth=1.5;" edge="1" parent="1" source="box_down" target="box_distort">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="flow_34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;strokeColor=#333333;strokeWidth=1.5;" edge="1" parent="1" source="box_distort" target="box_flip">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        
+        <mxCell id="verdict_box" value="&lt;b&gt;Takeaway:&lt;/b&gt; Diagnostic boundary relevance does NOT imply sample-reweighted model learning superiority." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e8eaf6;strokeColor=#3f51b5;fontSize=8;align=center;" vertex="1" parent="1">
+          <mxGeometry x="775" y="365" width="330" height="45" as="geometry" />
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

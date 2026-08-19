@@ -1,0 +1,47 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS artifacts
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# LaTeX build artifacts & manuscript (kept local/private)
+manuscript/
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+
+# Internal development notes & raw thesis docs (kept local)
+docs/
+results/
+
+# IDE & Editor artifacts
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# External reference directory
+Active_STAR_RIS_Empowered_RSMA_Systems__Outage_Probability_and_Ergodic_Capacity/
