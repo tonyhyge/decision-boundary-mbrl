@@ -1,0 +1,73 @@
+# Pinning Manifest for Step 2 Baseline Reproduction (Q1 Upgrade Milestone)
+experiment: step2_baseline_reproduction
+date: "2026-08-19"
+author: "Pham Quang Minh"
+
+external_dependencies:
+  vagram:
+    repository: "https://github.com/pairlab/vagram"
+    pinned_commit: "cc7e2e4d280282abfac6bd77dd273c8000ea27a1"
+    license: "MIT"
+    framework: "MBRL-lib based (archived upstream)"
+
+runtime_environment:
+  machine_architecture: "Apple Silicon ARM64 (T6041 architecture, 12 cores)"
+  system_ram_gb: 24.00
+  os_version: "macOS Darwin 25.5.0"
+  python_version: "3.11.3"
+  pytorch_version: "2.8.0"
+  numpy_version: "2.0.0"
+  scipy_version: "1.14.0"
+  gymnasium_version: "1.2.2"
+  mujoco_version: "3.11.0"
+  torch_device: "cpu"
+
+environments:
+  smoke_test:
+    env_id: "InvertedPendulum-v5"
+    obs_dim: 4
+    act_dim: 1
+    max_episode_steps: 1000
+    reward_range: [-inf, inf]
+    termination_semantics: "angle_out_of_bounds"
+  controlled_pilot:
+    env_id: "Hopper-v4"
+    legacy_env_id: "Hopper-v2"
+    obs_dim: 11
+    act_dim: 3
+    max_episode_steps: 1000
+    termination_semantics: "healthy_state_range"
+  historical_benchmark_reference:
+    env_id: "Hopper-v2"
+    num_steps: 500000
+    model_batch_size: 1024
+    freq_train_model: 250
+    rollout_schedule: [20, 150, 1, 5]
+
+training_hyperparameters:
+  controlled_pilot_hopper:
+    total_steps: 10000
+    seeds: [42, 43, 44, 45, 46]
+    epoch_length: 1000
+    model_batch_size: 256
+    model_lr: 0.001
+    model_wd: 0.00005
+    ensemble_size: 7
+    num_elites: 5
+    patience: 10
+    validation_ratio: 0.2
+    freq_train_model: 1000
+    effective_model_rollouts_per_step: 400
+    rollout_schedule: [1, 1, 1, 1]
+    sac_updates_per_step: 5
+    sac_critic_lr: 0.0003
+    sac_actor_lr: 0.00003
+    sac_alpha_lr: 0.0003
+
+accounting_metrics_tracked:
+  - environment_interactions
+  - dynamics_gradient_updates
+  - sac_gradient_updates
+  - imagined_transitions
+  - wall_clock_seconds
+  - peak_memory_mb
