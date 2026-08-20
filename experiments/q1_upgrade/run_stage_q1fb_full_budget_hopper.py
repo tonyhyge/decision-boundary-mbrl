@@ -286,7 +286,8 @@ def run_full_budget_mbpo(
         if step % eval_freq == 0 or step == total_steps:
             eval_returns = []
             for ep in range(eval_episodes):
-                e_obs = eval_env.reset()
+                ep_seed = int(1000000 + step * 100 + ep)
+                e_obs = eval_env.reset(seed=ep_seed)
                 e_done = False
                 e_ret = 0.0
                 while not e_done:
@@ -324,6 +325,15 @@ def run_full_budget_mbpo(
 
     total_wall_clock = time.time() - start_time
 
+    # Get git metadata for strict audit
+    import subprocess
+    try:
+        git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=_ROOT).decode("ascii").strip()
+        git_dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=_ROOT).decode("ascii").strip())
+    except Exception:
+        git_commit = "unknown"
+        git_dirty = False
+
     # Compute terminal return over final 3 checkpoints
     if len(evaluation_history) >= 3:
         terminal_returns = [h["eval_mean_return"] for h in evaluation_history[-3:]]
@@ -339,6 +349,8 @@ def run_full_budget_mbpo(
         "env_id": env_id,
         "seed": seed,
         "total_steps": total_steps,
+        "git_commit": git_commit,
+        "git_dirty": git_dirty,
         "terminal_return_mean": terminal_mean,
         "final_return_mean": evaluation_history[-1]["eval_mean_return"] if evaluation_history else 0.0,
         "final_return_std": evaluation_history[-1]["eval_std_return"] if evaluation_history else 0.0,
@@ -379,8 +391,9 @@ def main():
     print(f"Output Directory: {args.out_dir}")
     print("=" * 80)
 
-    for algo in args.algorithms:
-        for seed in args.seeds:
+    # Interleave execution by seed pair: (seed: MLE, seed: VaGraM)
+    for seed in args.seeds:
+        for algo in args.algorithms:
             out_file = os.path.join(args.out_dir, f"q1fb_hopper_{algo}_seed{seed}.json")
             if os.path.exists(out_file):
                 print(f"\n[CACHE HIT] Found existing result: {out_file}")

@@ -47,11 +47,13 @@ class GymnasiumToGymAdapter:
         self.observation_space = self.env.observation_space
         self.action_space = self.env.action_space
 
-    def reset(self) -> np.ndarray:
-        obs, info = self.env.reset(seed=self._seed)
-        # Advance seed for future resets if needed
-        if self._seed is not None:
-            self._seed += 1
+    def reset(self, seed: Optional[int] = None) -> np.ndarray:
+        if seed is not None:
+            obs, info = self.env.reset(seed=seed)
+        else:
+            obs, info = self.env.reset(seed=self._seed)
+            if self._seed is not None:
+                self._seed += 1
         return np.asarray(obs, dtype=np.float32)
 
     def step(self, action: np.ndarray) -> Tuple[np.ndarray, float, bool, Dict[str, Any]]:
