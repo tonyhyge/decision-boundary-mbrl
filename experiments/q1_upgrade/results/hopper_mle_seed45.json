@@ -1,0 +1,233 @@
+{
+  "algorithm": "mle",
+  "env_id": "Hopper-v4",
+  "seed": 45,
+  "final_return_mean": 19.96678266444207,
+  "final_return_std": 1.4573515379453443,
+  "evaluation_history": [
+    {
+      "step": 2000,
+      "epoch": 1,
+      "algorithm": "mle",
+      "eval_mean_return": 58.357688018277805,
+      "eval_std_return": 0.8375150143199294,
+      "eval_returns": [
+        58.82146466094848,
+        57.50889491381418,
+        59.36898238459164,
+        57.222116641619756,
+        58.866981490414965
+      ],
+      "env_interactions": 2000,
+      "dyn_updates": 15,
+      "sac_updates": 5000,
+      "imagined_transitions": 400,
+      "wall_clock_sec": 23.511924982070923,
+      "memory_mb": 331.5625
+    },
+    {
+      "step": 3000,
+      "epoch": 2,
+      "algorithm": "mle",
+      "eval_mean_return": 6.756174247880173,
+      "eval_std_return": 0.23437928535930042,
+      "eval_returns": [
+        6.540089369400538,
+        6.617042903860942,
+        7.042842139999151,
+        7.039536875529395,
+        6.541359950610843
+      ],
+      "env_interactions": 3000,
+      "dyn_updates": 50,
+      "sac_updates": 10000,
+      "imagined_transitions": 800,
+      "wall_clock_sec": 47.74775767326355,
+      "memory_mb": 278.765625
+    },
+    {
+      "step": 4000,
+      "epoch": 3,
+      "algorithm": "mle",
+      "eval_mean_return": 27.50678349518189,
+      "eval_std_return": 9.887777328821276,
+      "eval_returns": [
+        33.1702453426664,
+        34.86589685510619,
+        31.290707899432956,
+        30.217984968749022,
+        7.989082409954877
+      ],
+      "env_interactions": 4000,
+      "dyn_updates": 105,
+      "sac_updates": 15000,
+      "imagined_transitions": 1200,
+      "wall_clock_sec": 72.14788293838501,
+      "memory_mb": 276.390625
+    },
+    {
+      "step": 5000,
+      "epoch": 4,
+      "algorithm": "mle",
+      "eval_mean_return": 22.811916798715103,
+      "eval_std_return": 1.199891898407398,
+      "eval_returns": [
+        23.44190662527255,
+        21.901610831747327,
+        21.91573817177454,
+        21.90384326025044,
+        24.896485104530655
+      ],
+      "env_interactions": 5000,
+      "dyn_updates": 180,
+      "sac_updates": 20000,
+      "imagined_transitions": 1600,
+      "wall_clock_sec": 97.14793491363525,
+      "memory_mb": 258.1875
+    },
+    {
+      "step": 6000,
+      "epoch": 5,
+      "algorithm": "mle",
+      "eval_mean_return": 14.364958356602354,
+      "eval_std_return": 0.6847588411738387,
+      "eval_returns": [
+        13.827202177306084,
+        13.802406079047612,
+        13.79166135083825,
+        15.271329401133965,
+        15.132192774685858
+      ],
+      "env_interactions": 6000,
+      "dyn_updates": 275,
+      "sac_updates": 25000,
+      "imagined_transitions": 2000,
+      "wall_clock_sec": 122.9081289768219,
+      "memory_mb": 271.296875
+    },
+    {
+      "step": 7000,
+      "epoch": 6,
+      "algorithm": "mle",
+      "eval_mean_return": 18.11482153069862,
+      "eval_std_return": 0.8193761638034084,
+      "eval_returns": [
+        18.295427257259533,
+        17.99337749458304,
+        19.21886281290111,
+        18.374080221834554,
+        16.692359866914856
+      ],
+      "env_interactions": 7000,
+      "dyn_updates": 390,
+      "sac_updates": 30000,
+      "imagined_transitions": 2400,
+      "wall_clock_sec": 150.06351375579834,
+      "memory_mb": 189.3125
+    },
+    {
+      "step": 8000,
+      "epoch": 7,
+      "algorithm": "mle",
+      "eval_mean_return": 16.485746987569037,
+      "eval_std_return": 1.0061208035480755,
+      "eval_returns": [
+        16.79273710050225,
+        16.704327242437834,
+        15.357426051674475,
+        18.10329339296655,
+        15.470951150264076
+      ],
+      "env_interactions": 8000,
+      "dyn_updates": 525,
+      "sac_updates": 35000,
+      "imagined_transitions": 2800,
+      "wall_clock_sec": 178.50380182266235,
+      "memory_mb": 184.703125
+    },
+    {
+      "step": 9000,
+      "epoch": 8,
+      "algorithm": "mle",
+      "eval_mean_return": 15.18177551843591,
+      "eval_std_return": 1.1887732920608547,
+      "eval_returns": [
+        15.354560509481816,
+        16.467973387063807,
+        13.825002656896705,
+        13.801066433649165,
+        16.460274605088067
+      ],
+      "env_interactions": 9000,
+      "dyn_updates": 680,
+      "sac_updates": 40000,
+      "imagined_transitions": 3200,
+      "wall_clock_sec": 205.8596088886261,
+      "memory_mb": 185.265625
+    },
+    {
+      "step": 10000,
+      "epoch": 9,
+      "algorithm": "mle",
+      "eval_mean_return": 19.96678266444207,
+      "eval_std_return": 1.4573515379453443,
+      "eval_returns": [
+        20.998012280075304,
+        18.407398017980576,
+        20.09030041947851,
+        22.043551919410895,
+        18.294650685265072
+      ],
+      "env_interactions": 10000,
+      "dyn_updates": 855,
+      "sac_updates": 45000,
+      "imagined_transitions": 3600,
+      "wall_clock_sec": 233.12499403953552,
+      "memory_mb": 182.1875
+    }
+  ],
+  "dynamics_loss_history": [
+    {
+      "step": 1000,
+      "loss": -79.72197429339091
+    },
+    {
+      "step": 2000,
+      "loss": -150.41112540108816
+    },
+    {
+      "step": 3000,
+      "loss": -101.88736613880505
+    },
+    {
+      "step": 4000,
+      "loss": -381.6251607259115
+    },
+    {
+      "step": 5000,
+      "loss": -464.6934984709087
+    },
+    {
+      "step": 6000,
+      "loss": -591.7668319038722
+    },
+    {
+      "step": 7000,
+      "loss": -624.9371489348235
+    },
+    {
+      "step": 8000,
+      "loss": -677.3749880636892
+    },
+    {
+      "step": 9000,
+      "loss": -644.1839185442243
+    }
+  ],
+  "total_env_interactions": 10000,
+  "total_dyn_updates": 855,
+  "total_sac_updates": 45000,
+  "total_imagined_transitions": 3600,
+  "total_wall_clock_sec": 233.1251199245453,
+  "peak_memory_mb": 331.5625
+}

@@ -1,0 +1,230 @@
+{
+  "benchmark": "historical_vagram_hopper_reference",
+  "env_id": "Hopper-v4",
+  "seed": 42,
+  "total_steps": 25000,
+  "hyperparameters": {
+    "model_batch_size": 1024,
+    "freq_train_model": 250,
+    "sac_updates_per_step": 20,
+    "rollout_schedule": [
+      20,
+      150,
+      1,
+      5
+    ],
+    "sac_actor_lr": 3e-05,
+    "sac_critic_lr": 0.0003,
+    "sac_target_entropy": -1.0
+  },
+  "final_return_mean": 195.61356684561952,
+  "final_return_std": 5.787288496989082,
+  "evaluation_history": [
+    {
+      "step": 2500,
+      "epoch": 2,
+      "rollout_horizon": 1,
+      "eval_mean_return": 10.988669881633498,
+      "eval_std_return": 0.46761153418581763,
+      "eval_returns": [
+        10.596055006212143,
+        10.921092816466105,
+        10.75936213800544,
+        11.901003499859568,
+        10.76583594762424
+      ],
+      "env_interactions": 2500,
+      "dyn_updates": 35,
+      "sac_updates": 30000,
+      "imagined_transitions": 2400,
+      "wall_clock_sec": 168.74989008903503,
+      "memory_mb": 149.515625
+    },
+    {
+      "step": 5000,
+      "epoch": 4,
+      "rollout_horizon": 1,
+      "eval_mean_return": 56.75884288945972,
+      "eval_std_return": 0.8172244058408632,
+      "eval_returns": [
+        57.38363499591938,
+        55.771300565663964,
+        57.45024433880721,
+        55.74550848385983,
+        57.44352606304824
+      ],
+      "env_interactions": 5000,
+      "dyn_updates": 185,
+      "sac_updates": 80000,
+      "imagined_transitions": 6400,
+      "wall_clock_sec": 432.9196870326996,
+      "memory_mb": 134.171875
+    },
+    {
+      "step": 7500,
+      "epoch": 7,
+      "rollout_horizon": 1,
+      "eval_mean_return": 149.59703611797698,
+      "eval_std_return": 1.7453157692544943,
+      "eval_returns": [
+        151.02919091019098,
+        149.66885228630335,
+        149.60356696251606,
+        151.29469779619137,
+        146.38887263468325
+      ],
+      "env_interactions": 7500,
+      "dyn_updates": 460,
+      "sac_updates": 130000,
+      "imagined_transitions": 10400,
+      "wall_clock_sec": 694.9657979011536,
+      "memory_mb": 111.296875
+    },
+    {
+      "step": 10000,
+      "epoch": 9,
+      "rollout_horizon": 1,
+      "eval_mean_return": 104.29612124473871,
+      "eval_std_return": 0.7345760598422102,
+      "eval_returns": [
+        105.04842607167929,
+        103.262678018826,
+        103.62646537714645,
+        104.48551257827471,
+        105.05752417776712
+      ],
+      "env_interactions": 10000,
+      "dyn_updates": 860,
+      "sac_updates": 180000,
+      "imagined_transitions": 14400,
+      "wall_clock_sec": 951.17338514328,
+      "memory_mb": 108.8125
+    },
+    {
+      "step": 12500,
+      "epoch": 12,
+      "rollout_horizon": 1,
+      "eval_mean_return": 1015.8691391868357,
+      "eval_std_return": 0.8434335063957978,
+      "eval_returns": [
+        1015.3355055034029,
+        1015.2590011317409,
+        1015.1330977549527,
+        1017.3527650364202,
+        1016.2653265076611
+      ],
+      "env_interactions": 12500,
+      "dyn_updates": 1375,
+      "sac_updates": 230000,
+      "imagined_transitions": 18400,
+      "wall_clock_sec": 1221.4305212497711,
+      "memory_mb": 115.421875
+    },
+    {
+      "step": 15000,
+      "epoch": 14,
+      "rollout_horizon": 1,
+      "eval_mean_return": 119.08215829463074,
+      "eval_std_return": 2.028114438966613,
+      "eval_returns": [
+        118.10952606481779,
+        118.41522053134136,
+        119.49511811025211,
+        116.67448677140584,
+        122.71643999533664
+      ],
+      "env_interactions": 15000,
+      "dyn_updates": 2015,
+      "sac_updates": 280000,
+      "imagined_transitions": 22400,
+      "wall_clock_sec": 1499.3381531238556,
+      "memory_mb": 114.890625
+    },
+    {
+      "step": 17500,
+      "epoch": 17,
+      "rollout_horizon": 1,
+      "eval_mean_return": 136.44813752948716,
+      "eval_std_return": 14.0862104099901,
+      "eval_returns": [
+        147.2566693651533,
+        147.30091507153477,
+        117.6462363412704,
+        120.87806777708612,
+        149.15879909239115
+      ],
+      "env_interactions": 17500,
+      "dyn_updates": 2775,
+      "sac_updates": 330000,
+      "imagined_transitions": 26400,
+      "wall_clock_sec": 1771.762766122818,
+      "memory_mb": 113.1875
+    },
+    {
+      "step": 20000,
+      "epoch": 19,
+      "rollout_horizon": 1,
+      "eval_mean_return": 1018.0543737309878,
+      "eval_std_return": 0.3046148418109107,
+      "eval_returns": [
+        1017.5807257365842,
+        1017.9719923624402,
+        1018.5265756799585,
+        1018.0400126723539,
+        1018.1525622036022
+      ],
+      "env_interactions": 20000,
+      "dyn_updates": 3665,
+      "sac_updates": 380000,
+      "imagined_transitions": 30400,
+      "wall_clock_sec": 2049.5863511562347,
+      "memory_mb": 93.34375
+    },
+    {
+      "step": 22500,
+      "epoch": 22,
+      "rollout_horizon": 1,
+      "eval_mean_return": 134.28444318684393,
+      "eval_std_return": 1.2817478045177855,
+      "eval_returns": [
+        134.59744310938186,
+        135.81051487114374,
+        134.58953042197783,
+        134.51538652927326,
+        131.90934100244294
+      ],
+      "env_interactions": 22500,
+      "dyn_updates": 4670,
+      "sac_updates": 430000,
+      "imagined_transitions": 34400,
+      "wall_clock_sec": 2364.4858491420746,
+      "memory_mb": 87.109375
+    },
+    {
+      "step": 25000,
+      "epoch": 24,
+      "rollout_horizon": 1,
+      "eval_mean_return": 195.61356684561952,
+      "eval_std_return": 5.787288496989082,
+      "eval_returns": [
+        200.8461007514469,
+        188.0009916870108,
+        189.09667506379438,
+        200.26848179311241,
+        199.85558493273305
+      ],
+      "env_interactions": 25000,
+      "dyn_updates": 5795,
+      "sac_updates": 480000,
+      "imagined_transitions": 38400,
+      "wall_clock_sec": 2660.9835572242737,
+      "memory_mb": 98.609375
+    }
+  ],
+  "total_env_interactions": 25000,
+  "total_dyn_updates": 5795,
+  "total_sac_updates": 480000,
+  "total_imagined_transitions": 38400,
+  "total_wall_clock_sec": 2660.9854559898376,
+  "peak_memory_mb": 149.515625
+}

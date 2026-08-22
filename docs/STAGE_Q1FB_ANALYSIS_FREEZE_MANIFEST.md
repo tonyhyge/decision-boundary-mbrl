@@ -1,0 +1,24 @@
+# Stage Q1-FB Analysis Freeze Manifest
+
+**Freeze Tag:** `FB3_ANALYSIS_FREEZE_2026-08-22`  
+**Status:** `ANALYSIS_INFRASTRUCTURE_FROZEN`  
+**Target Cohort:** `Hopper-v4 Full Budget 125k (N=10 paired seeds 142-151)`  
+**Failure Policy:** `invalid_run -> rerun_same_seed_from_scratch`  
+
+### SHA-256 Checksums of Frozen Artifacts:
+
+| File Path | SHA-256 Hash |
+| :--- | :--- |
+| `experiments/q1_upgrade/statistical_closure_pipeline.py` | `59d6dd4685e3bd4e503c6ce7bd40e2702822d41932b2e5e4834758539a381bb3` |
+| `experiments/q1_upgrade/audit_run_integrity.py` | `ce434c2ac23469fa58689e949d1aa3e5263d366a2b1ee2ba19ed52a9e3ce5307` |
+| `experiments/q1_upgrade/generate_publication_figures.py` | `ff3e68c4b42718f71b55e4b8036bffa24e7c5c2a94def85d89e0823093e9f7fd` |
+| `experiments/q1_upgrade/audit_implementation_symmetry.py` | `2a0a5ffb98dddf8f27c24c062cc4ed9b2fef0039c535334da6992c0e55e5925c` |
+| `experiments/q1_upgrade/audit_cross_device_invariants.py` | `bdb5a3417100968f225243aafa95ed7edffac3e528b35af71bcd70c0152a7097` |
+| `experiments/q1_upgrade/audit_compute_accounting.py` | `a42d7b4f51c55caee15d7c1ef12c0cd8b74683b08c8116bd2eba0ee9dd8af563` |
+| `docs/STAGE_Q1FB_MANUSCRIPT_METHODS.md` | `a16a2afa329b00b177a8ae14aa0ee07efe41dc80bc2dcfa15d8ba1802e0fd2f5` |
+| `docs/LITERATURE_HORIZON_DEPENDENCE_AUDIT_2026.md` | `bd2e1ba2121ff5a71ae862ce87cc7820ba73df97cb161ca025c0cae840ccc344` |
+| `docs/STAGE_Q1FB_NUMERICAL_INVARIANT_AUDIT.md` | `4a9e148070cc3df57917ece9070bd9d0d1ed6c6fc9d5a3eeb98d1059edbe4b37` |
+| `docs/STAGE_Q1FB_IMPLEMENTATION_SYMMETRY_AUDIT.md` | `a6df4f78689486775498577a703022747977024b48673d8b7a9c79438af14572` |
+| `docs/STAGE_Q1FB_COMPUTE_ACCOUNTING.md` | `7df67064713a8bc09c993e73071d2ea2a8d92022da04311f8c1a83cff569e633` |
+| `experiments/q1_upgrade/run_stage_q1fb_full_budget_hopper.py` | `98944b392e00b8527f8d0c36357612f5470eab93fd99a167b5f86b31785e7c78` |
+| `experiments/q1_upgrade/run_stage_q1fb_cuda_parallel.py` | `6a4e645fcbd0c62694b904de74c0eb64b589d3c4aeb79cbf7e26d545a81a06fa` |

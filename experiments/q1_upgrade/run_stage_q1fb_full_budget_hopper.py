@@ -75,6 +75,12 @@ def run_full_budget_mbpo(
     # 1. Deterministic Seeding
     np.random.seed(seed)
     torch.manual_seed(seed)
+    if torch.cuda.is_available() and "cuda" in device:
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
     process = psutil.Process(os.getpid())
     start_time = time.time()
     peak_memory_mb = 0.0

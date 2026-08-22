@@ -1,0 +1,233 @@
+{
+  "algorithm": "vagram",
+  "env_id": "Hopper-v4",
+  "seed": 45,
+  "final_return_mean": 13.364203326538126,
+  "final_return_std": 0.46324994154883403,
+  "evaluation_history": [
+    {
+      "step": 2000,
+      "epoch": 1,
+      "algorithm": "vagram",
+      "eval_mean_return": 38.195811159700085,
+      "eval_std_return": 0.84307361910451,
+      "eval_returns": [
+        38.73385927791706,
+        37.15649281807719,
+        37.195694316117816,
+        39.11513443571111,
+        38.77787495067722
+      ],
+      "env_interactions": 2000,
+      "dyn_updates": 15,
+      "sac_updates": 5000,
+      "imagined_transitions": 400,
+      "wall_clock_sec": 30.154931783676147,
+      "memory_mb": 107.625
+    },
+    {
+      "step": 3000,
+      "epoch": 2,
+      "algorithm": "vagram",
+      "eval_mean_return": 3.199415868899799,
+      "eval_std_return": 0.13966069642517753,
+      "eval_returns": [
+        3.204530814906233,
+        3.125704725437325,
+        3.041066984836717,
+        3.1692923595922515,
+        3.4564844597264663
+      ],
+      "env_interactions": 3000,
+      "dyn_updates": 50,
+      "sac_updates": 10000,
+      "imagined_transitions": 800,
+      "wall_clock_sec": 58.29630494117737,
+      "memory_mb": 113.46875
+    },
+    {
+      "step": 4000,
+      "epoch": 3,
+      "algorithm": "vagram",
+      "eval_mean_return": 0.6233568384124564,
+      "eval_std_return": 0.13334843444169425,
+      "eval_returns": [
+        0.7258181001134254,
+        0.48987815580757577,
+        0.7561178017514987,
+        0.4350208748016897,
+        0.7099492595880921
+      ],
+      "env_interactions": 4000,
+      "dyn_updates": 105,
+      "sac_updates": 15000,
+      "imagined_transitions": 1200,
+      "wall_clock_sec": 84.97128987312317,
+      "memory_mb": 109.171875
+    },
+    {
+      "step": 5000,
+      "epoch": 4,
+      "algorithm": "vagram",
+      "eval_mean_return": 53.07262945130317,
+      "eval_std_return": 0.5638534561736683,
+      "eval_returns": [
+        53.626852896363495,
+        53.24027192010405,
+        53.01590172636266,
+        52.02243805512783,
+        53.457682658557864
+      ],
+      "env_interactions": 5000,
+      "dyn_updates": 180,
+      "sac_updates": 20000,
+      "imagined_transitions": 1600,
+      "wall_clock_sec": 114.17046976089478,
+      "memory_mb": 111.5625
+    },
+    {
+      "step": 6000,
+      "epoch": 5,
+      "algorithm": "vagram",
+      "eval_mean_return": 55.00475909796021,
+      "eval_std_return": 5.453697843930915,
+      "eval_returns": [
+        65.65869194745017,
+        54.26138154144541,
+        52.81198340180014,
+        50.96575918693471,
+        51.32597941217061
+      ],
+      "env_interactions": 6000,
+      "dyn_updates": 275,
+      "sac_updates": 25000,
+      "imagined_transitions": 2000,
+      "wall_clock_sec": 139.78876972198486,
+      "memory_mb": 107.171875
+    },
+    {
+      "step": 7000,
+      "epoch": 6,
+      "algorithm": "vagram",
+      "eval_mean_return": 41.17169743037115,
+      "eval_std_return": 0.7626727727396678,
+      "eval_returns": [
+        40.20712131109916,
+        41.724978734964296,
+        41.70686659370807,
+        41.93974309893571,
+        40.27977741314851
+      ],
+      "env_interactions": 7000,
+      "dyn_updates": 390,
+      "sac_updates": 30000,
+      "imagined_transitions": 2400,
+      "wall_clock_sec": 170.26258993148804,
+      "memory_mb": 104.03125
+    },
+    {
+      "step": 8000,
+      "epoch": 7,
+      "algorithm": "vagram",
+      "eval_mean_return": 204.67834249219564,
+      "eval_std_return": 1.763007401188179,
+      "eval_returns": [
+        207.1200909504016,
+        206.00350354015555,
+        204.78252102111938,
+        203.14234427518204,
+        202.34325267411958
+      ],
+      "env_interactions": 8000,
+      "dyn_updates": 525,
+      "sac_updates": 35000,
+      "imagined_transitions": 2800,
+      "wall_clock_sec": 197.4206027984619,
+      "memory_mb": 101.328125
+    },
+    {
+      "step": 9000,
+      "epoch": 8,
+      "algorithm": "vagram",
+      "eval_mean_return": 93.5283454187711,
+      "eval_std_return": 2.722720839832863,
+      "eval_returns": [
+        91.96865769175108,
+        98.49013490776959,
+        90.45257973698034,
+        93.86541780659672,
+        92.86493695075772
+      ],
+      "env_interactions": 9000,
+      "dyn_updates": 680,
+      "sac_updates": 40000,
+      "imagined_transitions": 3200,
+      "wall_clock_sec": 226.08534479141235,
+      "memory_mb": 108.359375
+    },
+    {
+      "step": 10000,
+      "epoch": 9,
+      "algorithm": "vagram",
+      "eval_mean_return": 13.364203326538126,
+      "eval_std_return": 0.46324994154883403,
+      "eval_returns": [
+        13.171815372654876,
+        13.241419354484492,
+        14.258288680062853,
+        13.23899416283879,
+        12.910499062649613
+      ],
+      "env_interactions": 10000,
+      "dyn_updates": 855,
+      "sac_updates": 45000,
+      "imagined_transitions": 3600,
+      "wall_clock_sec": 256.62496066093445,
+      "memory_mb": 104.75
+    }
+  ],
+  "dynamics_loss_history": [
+    {
+      "step": 1000,
+      "loss": 0.41365779042243955
+    },
+    {
+      "step": 2000,
+      "loss": 2.15809645652771
+    },
+    {
+      "step": 3000,
+      "loss": 4.608545112609863
+    },
+    {
+      "step": 4000,
+      "loss": 9.44605618794759
+    },
+    {
+      "step": 5000,
+      "loss": 13.061878033688194
+    },
+    {
+      "step": 6000,
+      "loss": 12.099416571078093
+    },
+    {
+      "step": 7000,
+      "loss": 23.332982006779424
+    },
+    {
+      "step": 8000,
+      "loss": 34.791140340989635
+    },
+    {
+      "step": 9000,
+      "loss": 59.09301751273019
+    }
+  ],
+  "total_env_interactions": 10000,
+  "total_dyn_updates": 855,
+  "total_sac_updates": 45000,
+  "total_imagined_transitions": 3600,
+  "total_wall_clock_sec": 256.62504386901855,
+  "peak_memory_mb": 113.46875
+}

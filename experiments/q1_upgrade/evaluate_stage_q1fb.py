@@ -1,6 +1,7 @@
 """
 Evaluation and statistical reporting script for Stage Q1-FB: Full-Budget Hopper Confirmation.
 Computes primary paired terminal return deltas (Δ_i) and secondary horizon-interaction estimands (H_i).
+Separates Pilot Seeds (e.g. 101) from Confirmatory Cohort (seeds 142..151).
 Runs blind from raw JSON results files.
 """
 import os
@@ -11,9 +12,19 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
+import argparse
+
 _ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Evaluate Stage Q1-FB Full-Budget Confirmation.")
+    parser.add_argument("--results-dir", type=str, default=os.path.join(_ROOT, "results", "stage_q1fb"), help="Results directory")
+    parser.add_argument("--report-out", type=str, default=os.path.join(_ROOT, "docs", "STAGE_Q1FB_FULL_BUDGET_REPORT.md"), help="Report output path")
+    parser.add_argument("--fig-out", type=str, default=os.path.join(_ROOT, "figures", "stage_q1fb_full_budget_curves.pdf"), help="Figure output path")
+    return parser.parse_args()
 
 
 def bootstrap_ci(data, num_bootstraps=5000, alpha=0.05):
@@ -62,7 +73,8 @@ def load_q1fb_results(results_dir):
 
 
 def main():
-    results_dir = os.path.join(_ROOT, "results", "stage_q1fb")
+    args = parse_args()
+    results_dir = args.results_dir
     data = load_q1fb_results(results_dir)
 
     print("=" * 80)
@@ -71,20 +83,28 @@ def main():
 
     mle_seeds = set(data["mle"].keys())
     vagram_seeds = set(data["vagram"].keys())
-    paired_seeds = sorted(list(mle_seeds.intersection(vagram_seeds)))
+    all_paired_seeds = sorted(list(mle_seeds.intersection(vagram_seeds)))
+    
+    # Preregistered Confirmatory Cohort (seeds >= 142, total_steps == 125000)
+    confirmatory_seeds = [s for s in all_paired_seeds if s >= 142]
+    pilot_seeds = [s for s in all_paired_seeds if s < 142]
 
-    print(f"Completed MLE seeds:    {sorted(list(mle_seeds))}")
-    print(f"Completed VaGraM seeds: {sorted(list(vagram_seeds))}")
-    print(f"Common Paired seeds:    {paired_seeds} (N={len(paired_seeds)})")
+    print(f"Completed MLE seeds:           {sorted(list(mle_seeds))}")
+    print(f"Completed VaGraM seeds:        {sorted(list(vagram_seeds))}")
+    print(f"Pilot Paired seeds (seed < 142): {pilot_seeds}")
+    print(f"Confirmatory Paired seeds (FB3): {confirmatory_seeds} (N={len(confirmatory_seeds)} / 10)")
     print("=" * 80)
 
     # 1. Individual Per-Seed Table
     per_seed_rows = []
     for algo in ["mle", "vagram"]:
-        for seed, r in data[algo].items():
+        for seed, r in sorted(data[algo].items()):
+            cohort = "Confirmatory" if seed >= 142 else "Pilot"
             per_seed_rows.append({
+                "Cohort": cohort,
                 "Algorithm": algo.upper(),
                 "Seed": seed,
+                "Budget": f"{r['total_steps']//1000}k",
                 "Terminal Return (Final 3)": f"{r['terminal_return_mean']:.2f}",
                 "Final Return (Step 125k)": f"{r['final_return_mean']:.2f} ± {r['final_return_std']:.2f}",
                 "Dyn Updates": r["total_dyn_updates"],
@@ -99,13 +119,14 @@ def main():
         print("\n### Individual Per-Seed Breakdown:")
         print(df_per_seed.to_markdown(index=False))
 
-    # 2. Primary Confirmatory Paired Analysis: Δ_i^terminal
+    # 2. Primary Confirmatory Paired Analysis: Δ_i^terminal on Confirmatory Cohort
+    target_seeds = confirmatory_seeds if confirmatory_seeds else all_paired_seeds
     paired_rows = []
     deltas = []
     horizon_interactions = []
     h_rows = []
 
-    for seed in paired_seeds:
+    for seed in target_seeds:
         mle_ret = data["mle"][seed]["terminal_return_mean"]
         vag_ret = data["vagram"][seed]["terminal_return_mean"]
         delta = vag_ret - mle_ret
@@ -143,7 +164,7 @@ def main():
 
     if paired_rows:
         df_paired = pd.DataFrame(paired_rows)
-        print("\n### Primary Confirmatory Paired Analysis (N={}):".format(len(paired_seeds)))
+        print("\n### Primary Confirmatory Paired Analysis (Cohort N={}):".format(len(target_seeds)))
         print(df_paired.to_markdown(index=False))
 
         mean_delta, (ci_low, ci_high) = bootstrap_ci(deltas)
@@ -152,7 +173,7 @@ def main():
         wins = sum(1 for d in deltas if d > 0)
         win_rate = (wins / len(deltas)) * 100.0
 
-        print(f"\n--- Primary Terminal Return Estimand (N={len(paired_seeds)}) ---")
+        print(f"\n--- Primary Terminal Return Estimand (N={len(target_seeds)}) ---")
         print(f"Mean Paired Δ:              {mean_delta:+.2f}")
         print(f"95% Paired Bootstrap CI:    [{ci_low:+.2f}, {ci_high:+.2f}]")
         print(f"Median Paired Δ:            {median_delta:+.2f}")
@@ -177,36 +198,28 @@ def main():
         print(f"Permutation p-value:        {p_val_h:.4f}")
         print(f"Horizon Positive Fraction:  {h_wins} / {len(horizon_interactions)} ({(h_wins/len(horizon_interactions))*100:.1f}%)")
 
-    # 4. Learning Curves Plot
-    fig_path = os.path.join(_ROOT, "figures", "stage_q1fb_full_budget_curves.pdf")
+    # 4. Learning Curves Plot (Confirmatory Cohort)
+    fig_path = args.fig_out
     os.makedirs(os.path.dirname(fig_path), exist_ok=True)
-    plt.figure(figsize=(9, 5.5))
+    plt.figure(figsize=(9.5, 5.5))
 
     color_map = {"mle": "#1f77b4", "vagram": "#ff7f0e"}
     label_map = {"mle": "Standard MLE (Gaussian NLL)", "vagram": "VaGraM (Value-Gradient MSE)"}
 
+    # Plot 125k confirmatory curves
+    plot_seeds = confirmatory_seeds if confirmatory_seeds else target_seeds
     for algo in ["mle", "vagram"]:
-        if not data[algo]:
-            continue
-        curves = []
-        steps = None
-        for seed, r in data[algo].items():
-            hist = r.get("evaluation_history", [])
-            s_list = [h["step"] for h in hist]
-            r_list = [h["eval_mean_return"] for h in hist]
-            if steps is None:
-                steps = s_list
-            curves.append(r_list)
-        if curves:
-            arr = np.array(curves)
-            mean_c = np.mean(arr, axis=0)
-            std_c = np.std(arr, axis=0, ddof=1) if len(curves) > 1 else np.zeros_like(mean_c)
-            plt.plot(steps, mean_c, label=f"{label_map[algo]} (N={len(curves)})", color=color_map[algo], linewidth=2.2)
-            plt.fill_between(steps, mean_c - std_c, mean_c + std_c, color=color_map[algo], alpha=0.18)
+        for seed in plot_seeds:
+            if seed in data[algo]:
+                hist = data[algo][seed].get("evaluation_history", [])
+                s_list = [h["step"] for h in hist]
+                r_list = [h["eval_mean_return"] for h in hist]
+                label = f"{label_map[algo]} (Seed {seed})" if len(plot_seeds) <= 3 else (label_map[algo] if seed == plot_seeds[0] else None)
+                plt.plot(s_list, r_list, label=label, color=color_map[algo], linewidth=2.0, alpha=0.85)
 
-    plt.title("Stage Q1-FB: Full-Budget MBPO on Hopper-v4 (10 Eval Episodes / Checkpoint)", fontsize=12, fontweight="bold")
+    plt.title("Stage Q1-FB: Full-Budget MBPO on Hopper-v4 (125k Steps, 10 Eval Episodes / Checkpoint)", fontsize=12, fontweight="bold")
     plt.xlabel("Environment Interaction Steps", fontsize=11)
-    plt.ylabel("Evaluation Return (Mean ± 1 SD)", fontsize=11)
+    plt.ylabel("Evaluation Return (10 Deterministic Episodes, Mean)", fontsize=11)
     plt.grid(True, linestyle="--", alpha=0.5)
     plt.legend(fontsize=10, loc="upper left")
     plt.tight_layout()
@@ -215,15 +228,16 @@ def main():
     print(f"\nSaved learning curve figure to: {fig_path}")
 
     # 5. Generate Markdown Artifact
-    report_path = os.path.join(_ROOT, "docs", "STAGE_Q1FB_FULL_BUDGET_REPORT.md")
+    report_path = args.report_out
+    os.makedirs(os.path.dirname(report_path), exist_ok=True)
     with open(report_path, "w") as f:
         f.write("# Scientific Report: Stage Q1-FB Full-Budget Hopper Representativeness Confirmation\n\n")
         f.write("**Date:** 2026-08-21  \n")
         f.write("**Target Milestone:** Q1 Journal Upgrade — Stage Q1-FB (Full-Budget Hopper Confirmation)  \n")
         f.write("**Core Scientific Question:** Does the conclusion that VaGraM lacks a robust advantage over MLE hold when MBPO is trained in a canonical locomotion regime up to 125,000 environment steps?  \n")
-        f.write("**Accounting Controls:** Matched 7-model ensemble (elite 5, 4x200 ReLU), 20 SAC updates/step, retrain every 250 steps, 10 deterministic eval episodes per checkpoint.  \n\n")
+        f.write("**Accounting Controls:** Matched 7-model ensemble (elite 5, 4x200 ReLU), 20 SAC updates/step, retrain every 250 steps, 10 deterministic eval episodes per checkpoint on identical bitwise reset seeds.  \n\n")
         if paired_rows:
-            f.write("## 1. Primary Confirmatory Paired Analysis (Terminal Return)\n\n")
+            f.write(f"## 1. Primary Confirmatory Paired Analysis (Terminal Return, N={len(target_seeds)})\n\n")
             f.write(pd.DataFrame(paired_rows).to_markdown(index=False))
             f.write(f"\n\n- **Mean Paired $\\Delta$:** ${mean_delta:+.2f}$ (95% BCI: $[{ci_low:+.2f}, {ci_high:+.2f}]$)\n")
             f.write(f"- **Median Paired $\\Delta$:** ${median_delta:+.2f}$\n")
@@ -241,8 +255,8 @@ def main():
             f.write(pd.DataFrame(per_seed_rows).to_markdown(index=False))
             f.write("\n\n")
         f.write("## 4. Epistemic Demarcation & Interpretation Rules\n\n")
-        f.write("1. **Primary Estimand Priority:** Primary conclusion is determined strictly by the terminal return paired difference $\\Delta_i^{\\text{terminal}}$. Horizon interaction $H_i$ serves as a secondary mechanistic diagnostic.\n")
-        f.write("2. **No Claim Changes from Pilot:** Pilot Seed 101 represents a strong positive signal but does not close the confirmatory stage. Final conclusions require the full $N=10$ independent paired block ($[142, \\dots, 151]$).\n")
+        f.write("1. **Primary Estimand Priority:** Primary conclusion is determined strictly by the terminal return paired difference $\\Delta_i^{\\text{terminal}}$ on the confirmatory cohort ($[142, \\dots, 151]$). Horizon interaction $H_i$ serves as a secondary mechanistic diagnostic.\n")
+        f.write("2. **Separation of Pilot and Confirmatory Evidence:** Pilot Seed 101 is documented separately as exploratory/feasibility evidence and is not pooled into confirmatory inference.\n")
 
     print(f"Saved report artifact to: {report_path}")
     return 0
