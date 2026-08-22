@@ -109,7 +109,7 @@
 \end{scope}
 
 % ==============================================================================
-% PANEL (B): DECISION MARGIN GAUGE & 2x2 REGIME MATRIX (Clockwise Flow 1->2->3->4)
+% PANEL (B): DECISION MARGIN GAUGE & 2x2 REGIME MATRIX
 % ==============================================================================
 \begin{scope}[shift={(\PW+\GAP, 0)}]
     \draw[panel] (0,0) rectangle (\PW, \PH);
@@ -131,7 +131,7 @@
     \node[font=\tiny\bfseries, text=warnorange] at (2.75, \GY-0.22) {$0\le B<1$};
     \node[font=\tiny\bfseries, text=dangerred] at (4.5, \GY-0.22) {$B>1.0$};
 
-    % 2x2 Matrix of Regime Cards in Clockwise Harmonic Flow
+    % 2x2 Matrix of Regime Cards
     \def\CW{2.74cm}
     
     % Regime 1 (Top Left)
@@ -148,97 +148,78 @@
         Optimal $a^*$ preserved.
     };
 
-    % Regime 3 (Bottom Right - Natural Clockwise step from 2)
+    % Regime 3 (Bottom Right)
     \node[boxcard, fill=tieorangebg, draw=tieorangeborder, minimum width=\CW, text width=2.6cm, align=left] (R3) at (4.48, 2.0) {
         \textcolor{warnorange}{\textbf{3. Tie ($\Sigma$) ($B=1.0$)}}\hfill\textcolor{warnorange}{\textbf{[Tie]}}\\
         \tiny $\Delta m = -m_P \implies m_{\widehat{P}} = 0$\\
         Degenerate: $\widehat{Q}(a^*) = \widehat{Q}(a^{(2)})$.
     };
 
-    % Regime 4 (Bottom Left - Final Failure Endpoint)
+    % Regime 4 (Bottom Left)
     \node[boxcard, fill=dangerredbg, draw=dangerredborder, minimum width=\CW, text width=2.6cm, align=left] (R4) at (1.47, 2.0) {
         \textcolor{dangerred}{\textbf{4. Crossing ($B>1.0$)}}\hfill\textcolor{dangerred}{\textbf{[$\boldsymbol{\times}$]}}\\
         \tiny $\Delta m < -m_P \implies \widehat{Q}(a^{(2)}) > \widehat{Q}(a^*)$\\
         \textbf{Action Flip:} $Z_{\mathrm{cross}} = 1$.
     };
 
-    % Clean, Direct, Non-Colliding Connection Arrows (Exactly like Panel C)
+    % Sequence Arrows
     \draw[->, line width=0.7pt, darkslate] (R1.east) -- (R2.west);
     \draw[->, line width=0.7pt, darkslate] (R2.south) -- (R3.north);
     \draw[->, line width=0.7pt, darkslate] (R3.west) -- (R4.east);
 
-    % Bottom Takeaway Box
+    % Bottom Takeaway Box (Reviewer-Safe Wording)
     \node[boxcard, fill=white, draw=panelborder, anchor=south, minimum width=\PW cm - 0.3cm, inner sep=2.5pt] at (\PW/2, 0.15) {
-        \parbox{5.4cm}{\centering \tiny \textbf{Diagnostic Metric:} $B(s) = -\Delta m(s)/m_P(s)$ is the sharp causal parameter for action failure.}
+        \parbox{5.4cm}{\centering \tiny \textbf{Diagnostic Metric:} $B(s) = -\Delta m(s)/m_P(s)$ provides the sharp local crossing criterion for action failure.}
     };
 \end{scope}
 
 % ==============================================================================
-% PANEL (C): SPATIAL CORRIDOR & BELLMAN PROPAGATION BOTTLENECK
+% PANEL (C): FROM DECISION RELEVANCE TO LEARNING UTILITY (REFINED)
 % ==============================================================================
 \begin{scope}[shift={(2*\PW+2*\GAP, 0)}]
     \draw[panel] (0,0) rectangle (\PW, \PH);
-    \node[font=\bfseries\scriptsize, text=primaryblue, anchor=north] at (\PW/2, \PH-0.18) {(c) Spatial Corridor \& Propagation};
+    \node[font=\bfseries\scriptsize, text=primaryblue, anchor=north] at (\PW/2, \PH-0.18) {(c) Relevance vs. Learning Utility};
 
-    % Global Value Backup Annotation
-    \node[font=\tiny\bfseries, text=backupcolor, anchor=north] at (\PW/2, \PH-0.5) {Global Backup: $V(s) \leftarrow \max_a [r + \gamma \mathbb{E} V(s')]$};
+    % Top Progression Flow: Prediction Error -> Decision Relevance -> Learning Utility
+    \node[boxcard, fill=white, draw=midgray, font=\tiny\bfseries] (P1) at (0.95, 5.3) {Pred Error};
+    \node[boxcard, fill=warnyellowbg, draw=warnyellowborder, font=\tiny\bfseries] (P2) at (2.95, 5.3) {Decision Rel.};
+    \node[boxcard, fill=safegreenbg, draw=safegreenborder, font=\tiny\bfseries] (P3) at (5.0, 5.3) {Utility $\mathcal{U}_T$};
 
-    % State Nodes with named handles (placed at y=4.2 to leave clearance above)
-    \node[state] (N0) at (0.75, 4.2) {$s_0$};
-    \node[state] (N1) at (2.15, 4.2) {$s_1$};
-    \node[state] (N2) at (3.55, 4.2) {$s_2$};
-    \node[state, draw=dangerred, fill=dangerredbg] (NC) at (4.95, 4.2) {\textcolor{dangerred}{$s_{\mathrm{cross}}$}};
+    \draw[->, line width=0.8pt, darkslate] (P1) -- (P2) node[midway, above=1pt, font=\tiny\bfseries] {$\neq$};
+    \draw[->, line width=0.8pt, darkslate] (P2) -- (P3) node[midway, above=1pt, font=\tiny\bfseries] {$\not\Rightarrow$};
 
-    \node[font=\tiny, text=darkslate, below=2pt of N0] {Start};
-    \node[font=\tiny, text=darkslate, below=2pt of N1] {Corridor};
-    \node[font=\tiny, text=darkslate, below=2pt of N2] {Corridor};
-    \node[font=\tiny\bfseries, text=dangerred, below=2pt of NC] {Boundary};
+    % Bifurcation Branches from Decision-Relevant Selection
+    \coordinate (SPLIT) at (2.95, 4.5);
+    \node[font=\tiny\bfseries, text=darkslate] at (2.95, 4.75) {Targeted Intervention};
 
-    % Bellman Backup Curved Arc (Clear arc under the text)
-    \draw[->, backupcolor, dashed, line width=1.0pt] 
-        (NC.north) to[out=145, in=35] (N0.north);
+    % Left Branch: One-Step Utility (Predictable)
+    \node[boxcard, fill=safegreenbg, draw=safegreenborder, text width=2.45cm, align=left] (B_ONE) at (1.45, 3.65) {
+        \textbf{\textcolor{safegreen}{One-Step Utility ($T=1$)}}\hfill\textcolor{safegreen}{\textbf{[$\checkmark$]}}\\
+        \tiny $\mathcal{U}_1(S) \approx \nabla_\theta L(S)^\top v$\\
+        \textbf{Local gradient aligns}
+    };
 
-    % Forward Transition Arrows
-    \draw[->, line width=1.0pt, accentblue] (N0) -- (N1) node[midway, above=0.5pt, font=\tiny] {$w_0 \downarrow$};
-    \draw[->, line width=1.0pt, accentblue] (N1) -- (N2) node[midway, above=0.5pt, font=\tiny] {$w_1 \downarrow$};
-    \draw[->, line width=1.2pt, dangerred] (N2) -- (NC) node[midway, above=0.5pt, font=\tiny, text=dangerred] {$w_{\mathrm{cross}} \uparrow\uparrow$};
+    % Right Branch: Multi-Step MBRL Utility (Not Guaranteed)
+    \node[boxcard, fill=warnyellowbg, draw=warnyellowborder, text width=2.45cm, align=left] (B_MULTI) at (4.5, 3.65) {
+        \textbf{\textcolor{warnorange}{Long-Horizon ($T \gg 1$)}}\hfill\textcolor{warnorange}{\textbf{[?]}}\\
+        \tiny $\mathcal{U}_T(S) = J(\theta') - J(\theta)$\\
+        \textbf{Not Guaranteed}
+    };
 
-    % Causal Degradation Pipeline (4 Steps in 2x2 Grid)
-    \def\BW{2.74cm}
-    
-    \node[boxcard, fill=dangerredbg, draw=dangerredborder, minimum width=\BW, text width=2.6cm, align=left, inner sep=2.5pt] 
-        (B1) at (1.47, 2.7) {
-            \textbf{\textcolor{dangerred}{1. Boundary Upweight}}\\
-            \tiny $w(s_{\mathrm{cross}}) \uparrow$ $(\lambda > 0)$
-        };
+    \draw[->, line width=0.7pt, safegreen] (SPLIT) -- (B_ONE.north);
+    \draw[->, line width=0.7pt, warnorange] (SPLIT) -- (B_MULTI.north);
 
-    \node[boxcard, fill=warnyellowbg, draw=warnyellowborder, minimum width=\BW, text width=2.6cm, align=left, inner sep=2.5pt] 
-        (B2) at (4.48, 2.7) {
-            \textbf{\textcolor{warnorange}{2. Corridor Depletion}}\\
-            \tiny $w(s_1, s_2) \downarrow$ $(\sum w_i = N)$
-        };
+    % Conditioning Factors Box
+    \node[boxcard, fill=backupbg, draw=backupcolor!60, text width=5.2cm, align=left] (COND) at (\PW/2, 1.95) {
+        \textbf{\textcolor{backupcolor}{Operator \& Regime Conditioning:}} \tiny $\mathcal{U}_T = f(\mathcal{O}_T, \mathcal{D}, \text{budget})$\\
+        \tiny $\bullet$ Optimizer non-convexity \& momentum drift (Adam $\neq$ 1-step GD)\\
+        \tiny $\bullet$ Replay buffer coverage vs. localized representation collapse\\
+        \tiny $\bullet$ Full-budget study tests whether relative utility shifts across regimes
+    };
 
-    \node[boxcard, fill=backupbg, draw=backupcolor!60, minimum width=\BW, text width=2.6cm, align=left, inner sep=2.5pt] 
-        (B3) at (4.48, 1.45) {
-            \textbf{\textcolor{backupcolor}{3. Value Distortion}}\\
-            \tiny $\widehat{V}(s')$ backup noise
-        };
-
-    \node[boxcard, fill=dangerredbg, draw=dangerredborder, minimum width=\BW, text width=2.6cm, align=left, inner sep=2.5pt] 
-        (B4) at (1.47, 1.45) {
-            \textbf{\textcolor{dangerred}{4. Upstream Policy Flips}}\\
-            \tiny Action flips at $s_0 \downarrow$
-        };
-
-    % Sequence Arrows
-    \draw[->, line width=0.7pt, darkslate] (B1.east) -- (B2.west);
-    \draw[->, line width=0.7pt, darkslate] (B2.south) -- (B3.north);
-    \draw[->, line width=0.7pt, darkslate] (B3.west) -- (B4.east);
-    \draw[->, line width=0.7pt, dangerred, dashed] (B4.north) -- (B1.south);
-
-    % Bottom Takeaway Box
+    % Bottom Takeaway Box (Reviewer-Safe Takeaway)
     \node[boxcard, fill=white, draw=panelborder, anchor=south, minimum width=\PW cm - 0.3cm, inner sep=2.5pt] at (\PW/2, 0.15) {
-        \parbox{5.4cm}{\centering \tiny \textbf{Bottleneck:} Sample reallocation starves corridor dynamics, propagating errors to invert upstream actions.}
+        \parbox{5.4cm}{\centering \tiny \textbf{Core Takeaway:} Decision relevance alone does not determine learning utility; utility depends on the learning operator and training regime.}
     };
 \end{scope}
 
