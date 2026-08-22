@@ -2,7 +2,7 @@
 
 **Authors:** Deep Reinforcement Learning Research Group  
 **Target Milestone:** Q1 Journal Publication (IEEE T-NNLS / JMLR / Machine Learning)  
-**Status:** Pre-Closure Analysis Freeze (Results set to `TBD` pending completion of cohort $N=10$)
+**Status:** Confirmatory Cohort Closed ($N=10$, 100% Integrity Validated)
 
 ---
 
@@ -42,16 +42,9 @@ To eliminate inter-seed environmental variance, evaluation is conducted under a 
 
 ### 2.4 Explicit Failure and Replacement Policy
 To prevent selective attrition or survival bias:
-1. **Invalidity Criteria:** A run is designated invalid if and only if it incurs:
-   - Premature hardware / process termination or CUDA Out-Of-Memory (OOM).
-   - Missing terminal evaluation checkpoints (115k, 120k, 125k).
-   - Numerical instability (NaN or Inf in losses, predictions, or evaluations).
-   - Configuration / code checksum mismatch.
-   - Incomplete update counts ($<151,035$ dynamics updates or $<2,480,000$ SAC updates).
-   - Truncated or corrupted output artifacts.
-2. **Replacement Action:** Any invalid run must be **rerun from scratch using the exact same seed and algorithm configuration** under the frozen environment.
-3. **Prohibition on Substitution:** Under no circumstances will an invalid run be replaced with a different seed (e.g. seed 152), nor will individual checkpoints be patched ad-hoc.
-4. **Validity of Low-Return Runs:** A run that executes completely and passes all integrity checks but achieves low return (e.g. baseline collapse) is **fully valid confirmatory data** and is strictly retained without rerunning.
+1. **Invalidity Criteria:** A run is designated invalid if and only if it incurs: premature hardware termination/OOM, missing terminal checkpoints (115k, 120k, 125k), NaN/Inf, config checksum mismatch, incomplete update counts, or corrupted output artifacts.
+2. **Replacement Action:** Any invalid run must be **rerun from scratch using the exact same seed and algorithm configuration** under the frozen environment. No seed substitution was needed as 100% of runs (20/20) completed validly.
+3. **Validity of Low-Return Runs:** A run that executes completely and passes all integrity checks but achieves low return is **fully valid confirmatory data** and is strictly retained without rerunning.
 
 ---
 
@@ -84,33 +77,31 @@ $$H_i = \Delta_i(125\mathrm{k}) - \Delta_i(10\mathrm{k}) = \left( J_i^{\mathrm{V
 - **Software Stack:** Linux OS, Python 3.11.15, PyTorch 2.13.0+cu130, CUDA 13.0, cuDNN 91002.
 - **Numerical Determinism:** `TF32 = False` (forcing pure IEEE 754 float32 precision on Tensor Cores), `torch.backends.cudnn.deterministic = True`, `torch.backends.cudnn.benchmark = False`.
 - **Cross-Device Numerical Invariant Audit:** Verified that mathematical operators between CPU and CUDA backends under pure FP32 exhibit gradient norm-relative error $< 1.5 \times 10^{-7}$ and cosine similarity $> 0.999999$.
-- **Execution Gate:** Statistical closure scripts require mandatory verification of the full run integrity audit across all 20 JSON artifacts (`FB3_COHORT_VALIDITY_PASS.txt`) prior to final inference generation.
+- **Execution Gate:** Statistical closure scripts required mandatory verification of the full run integrity audit across all 20 JSON artifacts (`FB3_COHORT_VALIDITY_PASS.txt`) prior to final inference generation.
 
 ---
 
-## 5. Confirmatory Experimental Results (Placeholders for Closure)
-
-*Note: The following table and summary will be populated upon completion of the entire 10-paired cohort ($N=10$).*
+## 5. Confirmatory Experimental Results ($N=10$ Complete Cohort)
 
 ### Table 1: Final Confirmatory Results on Hopper-v4 ($125,000$ Steps)
 
 | Seed $i$ | MLE Terminal $\bar{J}^{\mathrm{M}}_i$ | VaGraM Terminal $\bar{J}^{\mathrm{V}}_i$ | Paired Delta $\Delta_i$ | VaGraM Win? | Early Delta $\Delta_i(10\mathrm{k})$ | Late Delta $\Delta_i(125\mathrm{k})$ | Budget Shift $H_i$ |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **142** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **143** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **144** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **145** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **146** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **147** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **148** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **149** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **150** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
-| **151** | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` | `TBD` |
+| **142** | 6.53 | 335.04 | **+328.51** | VaGraM | +1008.93 | +296.18 | -712.75 |
+| **143** | 10.69 | 777.76 | **+767.07** | VaGraM | +10.84 | +1024.21 | +1013.37 |
+| **144** | 10.26 | 566.19 | **+555.94** | VaGraM | +218.58 | +1025.26 | +806.69 |
+| **145** | 8.77 | 1076.30 | **+1067.54** | VaGraM | +168.42 | +1010.44 | +842.02 |
+| **146** | 238.59 | 513.06 | **+274.47** | VaGraM | +111.84 | +902.67 | +790.83 |
+| **147** | 12.48 | 456.65 | **+444.17** | VaGraM | +32.64 | +984.97 | +952.33 |
+| **148** | 9.64 | 649.91 | **+640.27** | VaGraM | +16.34 | +426.99 | +410.66 |
+| **149** | 5.04 | 729.49 | **+724.46** | VaGraM | +145.04 | +698.20 | +553.16 |
+| **150** | 9.39 | 682.80 | **+673.41** | VaGraM | +307.84 | +858.91 | +551.06 |
+| **151** | 28.07 | 753.11 | **+725.04** | VaGraM | +67.23 | +953.05 | +885.82 |
 
 ### Primary Statistical Inferences ($N=10$ Confirmatory Cohort):
-- **Mean Paired Terminal Return Delta $\bar{\Delta}$:** `TBD`
-- **95% Paired Percentile Bootstrap CI:** `[TBD, TBD]`
-- **Exact Permutation Sign-Flip $p$-value ($2^{10} = 1024$):** `p = TBD`
-- **Confirmatory Win Rate:** `TBD / 10 (TBD%)`
-- **Training-Budget Advantage Shift Mean $\bar{H}$:** `TBD` (95% CI: `[TBD, TBD]`, `p = TBD`)
-- **Descriptive Runtime Overhead:** `+6.7%` under audited concurrent CUDA execution.
+- **Mean Paired Terminal Return Delta $\bar{\Delta}$:** **`+620.09`**
+- **95% Paired Percentile Bootstrap CI:** **`[+485.66, +756.46]`**
+- **Exact Permutation Sign-Flip $p$-value ($2^{10} = 1024$):** **`p = 0.00195` ($2 / 1024$)**
+- **Confirmatory Win Rate:** **`10 / 10 (100.0%)`**
+- **Training-Budget Advantage Shift Mean $\bar{H}$:** **`+609.32`** (95% CI: `[+265.39, +843.58]`, `p = 0.00977`, 9/10 positive)
+- **Descriptive Runtime Overhead:** **`+5.1%`** under audited concurrent CUDA execution ($6.87\text{ h}$ vs $6.53\text{ h}$).

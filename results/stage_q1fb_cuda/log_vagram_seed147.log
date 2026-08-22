@@ -1,0 +1,48 @@
+=== Stage Q1-FB Run: VAGRAM Seed 147 on physical GPU 3 (isolated cuda:0) ===
+Command: /home/minhpham/miniconda3/envs/drl-q1fb/bin/python -u /home/minhpham/gitlab/vimedscan_new/drl-thesis/experiments/q1_upgrade/run_stage_q1fb_full_budget_hopper.py --algorithms vagram --seeds 147 --total-steps 125000 --eval-freq 5000 --eval-episodes 10 --device cuda:0 --out-dir results/stage_q1fb_cuda
+
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+================================================================================
+STAGE Q1-FB: FULL-BUDGET HOPPER REPRESENTATIVENESS CONFIRMATION (125k STEPS)
+================================================================================
+Algorithms:       ['vagram']
+Seeds:            [147] (N=1)
+Total Steps/Seed: 125000
+Eval Frequency:   Every 5000 steps (10 deterministic episodes)
+Output Directory: results/stage_q1fb_cuda
+================================================================================
+
+---> Running Q1-FB VAGRAM on Hopper-v4 | Seed 147 (Budget: 125000 steps) <---
+/home/minhpham/miniconda3/envs/drl-q1fb/lib/python3.11/site-packages/gymnasium/envs/registration.py:513: DeprecationWarning: [33mWARN: The environment Hopper-v4 is out of date. You should consider upgrading to version `v5`.[0m
+  logger.deprecation(
+[VAGRAM] Step   5000/125000 | Return:   47.30 ±   1.14 | DynUpd:   185 | SACUpd:   80000 | Wall: 741.3s
+[VAGRAM] Step  10000/125000 | Return:   46.46 ±   0.87 | DynUpd:   860 | SACUpd:  180000 | Wall: 1669.6s
+[VAGRAM] Step  15000/125000 | Return:  991.74 ±   0.48 | DynUpd:  2015 | SACUpd:  280000 | Wall: 2625.0s
+[VAGRAM] Step  20000/125000 | Return:  124.73 ±   1.45 | DynUpd:  3665 | SACUpd:  380000 | Wall: 3568.5s
+[VAGRAM] Step  25000/125000 | Return:  116.66 ±  14.68 | DynUpd:  5795 | SACUpd:  480000 | Wall: 4521.6s
+[VAGRAM] Step  30000/125000 | Return: 1008.62 ±   0.40 | DynUpd:  8420 | SACUpd:  580000 | Wall: 5494.1s
+[VAGRAM] Step  35000/125000 | Return:  999.88 ±   0.80 | DynUpd: 11530 | SACUpd:  680000 | Wall: 6473.1s
+[VAGRAM] Step  40000/125000 | Return:   78.88 ±   0.30 | DynUpd: 15130 | SACUpd:  780000 | Wall: 7442.1s
+[VAGRAM] Step  45000/125000 | Return:  997.55 ±   0.58 | DynUpd: 19220 | SACUpd:  880000 | Wall: 8431.9s
+[VAGRAM] Step  50000/125000 | Return: 1007.47 ±   0.45 | DynUpd: 23795 | SACUpd:  980000 | Wall: 9428.9s
+[VAGRAM] Step  55000/125000 | Return: 1035.40 ±   0.56 | DynUpd: 28865 | SACUpd: 1080000 | Wall: 10429.0s
+[VAGRAM] Step  60000/125000 | Return: 1021.63 ±   0.41 | DynUpd: 34415 | SACUpd: 1180000 | Wall: 11436.2s
+[VAGRAM] Step  65000/125000 | Return: 1022.92 ±   0.49 | DynUpd: 40460 | SACUpd: 1280000 | Wall: 12454.7s
+[VAGRAM] Step  70000/125000 | Return:  996.65 ±   0.71 | DynUpd: 46985 | SACUpd: 1380000 | Wall: 13474.3s
+[VAGRAM] Step  75000/125000 | Return:  380.92 ±  14.28 | DynUpd: 54005 | SACUpd: 1480000 | Wall: 14494.4s
+[VAGRAM] Step  80000/125000 | Return:  486.10 ±   3.43 | DynUpd: 61505 | SACUpd: 1580000 | Wall: 15517.8s
+[VAGRAM] Step  85000/125000 | Return:  393.16 ±   1.38 | DynUpd: 69505 | SACUpd: 1680000 | Wall: 16554.8s
+[VAGRAM] Step  90000/125000 | Return: 1030.29 ±   0.86 | DynUpd: 77985 | SACUpd: 1780000 | Wall: 17611.3s
+[VAGRAM] Step  95000/125000 | Return:  454.04 ±   1.21 | DynUpd: 86960 | SACUpd: 1880000 | Wall: 18662.2s
+[VAGRAM] Step 100000/125000 | Return: 1050.14 ±   1.24 | DynUpd: 96415 | SACUpd: 1980000 | Wall: 19728.5s
+[VAGRAM] Step 105000/125000 | Return:  410.24 ± 169.24 | DynUpd: 106365 | SACUpd: 2080000 | Wall: 20784.0s
+[VAGRAM] Step 110000/125000 | Return:  192.05 ±   7.95 | DynUpd: 116800 | SACUpd: 2180000 | Wall: 21858.6s
+[VAGRAM] Step 115000/125000 | Return:  201.35 ±   3.17 | DynUpd: 127725 | SACUpd: 2280000 | Wall: 22919.3s
+[VAGRAM] Step 120000/125000 | Return:  172.64 ±   4.22 | DynUpd: 139135 | SACUpd: 2380000 | Wall: 23981.5s
+[VAGRAM] Step 125000/125000 | Return:  995.97 ±   3.55 | DynUpd: 151035 | SACUpd: 2480000 | Wall: 25055.3s
+[COMPLETED] Q1-FB VAGRAM Seed 147 in 25055.4s | Terminal Return: 456.65
+
+Stage Q1-FB execution completed successfully.

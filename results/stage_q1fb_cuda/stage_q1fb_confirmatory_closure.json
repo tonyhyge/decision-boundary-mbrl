@@ -1,0 +1,164 @@
+{
+  "protocol_governance": "The final analysis code, estimands, statistical tests, and figure-generation pipeline were frozen before completion of the preregistered N=10 confirmatory cohort.",
+  "status": "CONFIRMATORY_COMPLETE",
+  "cohort_size_N": 10,
+  "target_N": 10,
+  "completed_seeds": [
+    142,
+    143,
+    144,
+    145,
+    146,
+    147,
+    148,
+    149,
+    150,
+    151
+  ],
+  "primary_estimand": {
+    "name": "Mean Paired Terminal Return Delta (115k-125k)",
+    "mean_paired_delta": 620.0883462738145,
+    "median_paired_delta": 656.8420020493529,
+    "std_paired_delta": 232.49926881026488,
+    "bootstrap_95_ci": [
+      485.6568826749105,
+      756.4550124627
+    ],
+    "exact_permutation_p_value": 0.001953125,
+    "win_rate": 1.0,
+    "win_count": 10
+  },
+  "secondary_training_budget_endpoint": {
+    "name": "Training-Budget Interaction Endpoint (Late-vs-Early Advantage Shift H_i = Delta(125k) - Delta(10k))",
+    "mean_H": 609.3193453217206,
+    "median_H": 798.7585898727089,
+    "bootstrap_95_ci": [
+      265.3934186693669,
+      843.5785762719075
+    ],
+    "exact_permutation_p_value": 0.009765625,
+    "positive_fraction": 0.9
+  },
+  "per_seed_breakdown": [
+    {
+      "seed": 142,
+      "mle_terminal": 6.525970991989154,
+      "vagram_terminal": 335.03988937336095,
+      "paired_delta_terminal": 328.5139183813718,
+      "vagram_wins": true,
+      "mle_10k": 8.808869457633064,
+      "vagram_10k": 1017.7432721809795,
+      "delta_10k": 1008.9344027233465,
+      "delta_125k": 296.1806896089885,
+      "training_budget_shift_H": -712.753713114358
+    },
+    {
+      "seed": 143,
+      "mle_terminal": 10.687385941122592,
+      "vagram_terminal": 777.7578072414823,
+      "paired_delta_terminal": 767.0704213003597,
+      "vagram_wins": true,
+      "mle_10k": 6.715177359345726,
+      "vagram_10k": 17.555186464354207,
+      "delta_10k": 10.84000910500848,
+      "delta_125k": 1024.2112080096722,
+      "training_budget_shift_H": 1013.3711989046637
+    },
+    {
+      "seed": 144,
+      "mle_terminal": 10.256825554734162,
+      "vagram_terminal": 566.192583956588,
+      "paired_delta_terminal": 555.9357584018538,
+      "vagram_wins": true,
+      "mle_10k": 4.592087559506313,
+      "vagram_10k": 223.16811407400664,
+      "delta_10k": 218.5760265145003,
+      "delta_125k": 1025.264043812988,
+      "training_budget_shift_H": 806.6880172984876
+    },
+    {
+      "seed": 145,
+      "mle_terminal": 8.766794728130654,
+      "vagram_terminal": 1076.3019558583799,
+      "paired_delta_terminal": 1067.5351611302492,
+      "vagram_wins": true,
+      "mle_10k": 9.041445938041836,
+      "vagram_10k": 177.46064051445086,
+      "delta_10k": 168.419194576409,
+      "delta_125k": 1010.4425924519885,
+      "training_budget_shift_H": 842.0233978755795
+    },
+    {
+      "seed": 146,
+      "mle_terminal": 238.59180651639102,
+      "vagram_terminal": 513.0585941420535,
+      "paired_delta_terminal": 274.4667876256625,
+      "vagram_wins": true,
+      "mle_10k": 59.8722024901942,
+      "vagram_10k": 171.7107010301746,
+      "delta_10k": 111.83849853998039,
+      "delta_125k": 902.6676609869104,
+      "training_budget_shift_H": 790.82916244693
+    },
+    {
+      "seed": 147,
+      "mle_terminal": 12.476927714400995,
+      "vagram_terminal": 456.65144884805073,
+      "paired_delta_terminal": 444.17452113364976,
+      "vagram_wins": true,
+      "mle_10k": 13.82083977111848,
+      "vagram_10k": 46.45766154984042,
+      "delta_10k": 32.63682177872194,
+      "delta_125k": 984.9709526902587,
+      "training_budget_shift_H": 952.3341309115368
+    },
+    {
+      "seed": 148,
+      "mle_terminal": 9.636614678898665,
+      "vagram_terminal": 649.9089359864511,
+      "paired_delta_terminal": 640.2723213075524,
+      "vagram_wins": true,
+      "mle_10k": 9.685600955138362,
+      "vagram_10k": 26.02186007170031,
+      "delta_10k": 16.336259116561948,
+      "delta_125k": 426.99360044093254,
+      "training_budget_shift_H": 410.6573413243706
+    },
+    {
+      "seed": 149,
+      "mle_terminal": 5.035214529956721,
+      "vagram_terminal": 729.4946091101459,
+      "paired_delta_terminal": 724.4593945801892,
+      "vagram_wins": true,
+      "mle_10k": 6.54088452556025,
+      "vagram_10k": 151.5858188843722,
+      "delta_10k": 145.04493435881196,
+      "delta_125k": 698.2006643462025,
+      "training_budget_shift_H": 553.1557299873906
+    },
+    {
+      "seed": 150,
+      "mle_terminal": 9.393270419920803,
+      "vagram_terminal": 682.8049532110741,
+      "paired_delta_terminal": 673.4116827911533,
+      "vagram_wins": true,
+      "mle_10k": 8.616963586189064,
+      "vagram_10k": 316.45764910338187,
+      "delta_10k": 307.8406855171928,
+      "delta_125k": 858.9054870668025,
+      "training_budget_shift_H": 551.0648015496097
+    },
+    {
+      "seed": 151,
+      "mle_terminal": 28.065660871707404,
+      "vagram_terminal": 753.1091569578103,
+      "paired_delta_terminal": 725.0434960861029,
+      "vagram_wins": true,
+      "mle_10k": 12.627850641989728,
+      "vagram_10k": 79.85838184515731,
+      "delta_10k": 67.23053120316759,
+      "delta_125k": 953.0539172361628,
+      "training_budget_shift_H": 885.8233860329951
+    }
+  ]
+}

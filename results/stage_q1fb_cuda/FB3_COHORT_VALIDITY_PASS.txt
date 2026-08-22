@@ -1,0 +1,6 @@
+STAGE Q1-FB (FB3) CONFIRMATORY COHORT VALIDITY PASS
+Timestamp UTC: 2026-08-22T18:28:00Z
+Cohort Size: N=10 paired seeds (142, 143, 144, 145, 146, 147, 148, 149, 150, 151)
+Total Runs Audited: 20 / 20 (10 MLE + 10 VaGraM)
+Integrity Status: 100% PASS (20/20 runs verified for 125k steps, 25 checkpoints, 151035 dyn updates, 2480000 SAC updates, 0 NaN/Inf)
+Cohort Validity Confirmed: TRUE

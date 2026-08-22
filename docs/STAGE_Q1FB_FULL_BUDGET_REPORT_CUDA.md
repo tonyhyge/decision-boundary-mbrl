@@ -5,7 +5,7 @@
 **Core Scientific Question:** Does the conclusion that VaGraM lacks a robust advantage over MLE hold when MBPO is trained in a canonical locomotion regime up to 125,000 environment steps?  
 **Accounting Controls:** Matched 7-model ensemble (elite 5, 4x200 ReLU), 20 SAC updates/step, retrain every 250 steps, 10 deterministic eval episodes per checkpoint on identical bitwise reset seeds.  
 
-## 1. Primary Confirmatory Paired Analysis (Terminal Return, N=6)
+## 1. Primary Confirmatory Paired Analysis (Terminal Return, N=10)
 
 |   Seed |   MLE Terminal Return |   VaGraM Terminal Return |   Paired Δ (VaGraM - MLE) | Win?   |
 |-------:|----------------------:|-------------------------:|--------------------------:|:-------|
@@ -15,11 +15,15 @@
 |    145 |                  8.77 |                  1076.3  |                   1067.54 | VaGraM |
 |    146 |                238.59 |                   513.06 |                    274.47 | VaGraM |
 |    147 |                 12.48 |                   456.65 |                    444.17 | VaGraM |
+|    148 |                  9.64 |                   649.91 |                    640.27 | VaGraM |
+|    149 |                  5.04 |                   729.49 |                    724.46 | VaGraM |
+|    150 |                  9.39 |                   682.8  |                    673.41 | VaGraM |
+|    151 |                 28.07 |                   753.11 |                    725.04 | VaGraM |
 
-- **Mean Paired $\Delta$:** $+572.95$ (95% BCI: $[+376.69, +809.02]$)
-- **Median Paired $\Delta$:** $+500.06$
-- **Paired Permutation $p$-value:** $0.0312$
-- **Win Rate:** 6 / 6 (100.0%)
+- **Mean Paired $\Delta$:** $+620.09$ (95% BCI: $[+486.36, +758.36]$)
+- **Median Paired $\Delta$:** $+656.84$
+- **Paired Permutation $p$-value:** $0.0020$
+- **Win Rate:** 10 / 10 (100.0%)
 
 ## 2. Secondary Mechanistic Horizon-Interaction Analysis
 
@@ -31,11 +35,15 @@
 |    145 |   168.42 |       1010.44 |                       842.02 | YES               |
 |    146 |   111.84 |        902.67 |                       790.83 | YES               |
 |    147 |    32.64 |        984.97 |                       952.33 | YES               |
+|    148 |    16.34 |        426.99 |                       410.66 | YES               |
+|    149 |   145.04 |        698.2  |                       553.16 | YES               |
+|    150 |   307.84 |        858.91 |                       551.06 | YES               |
+|    151 |    67.23 |        953.05 |                       885.82 | YES               |
 
-- **Mean Horizon Interaction $\bar{H}$:** $+615.42$ (95% BCI: $[+65.96, +935.91]$)
-- **Median Horizon Interaction:** $+824.36$
-- **Permutation $p$-value:** $0.0625$
-- **Horizon Positive Fraction:** 5 / 6 (83.3%)
+- **Mean Horizon Interaction $\bar{H}$:** $+609.32$ (95% BCI: $[+278.17, +837.59]$)
+- **Median Horizon Interaction:** $+798.76$
+- **Permutation $p$-value:** $0.0098$
+- **Horizon Positive Fraction:** 9 / 10 (90.0%)
 
 ## 3. Individual Per-Seed Breakdown
 
@@ -47,12 +55,20 @@
 | Confirmatory | MLE         |    145 | 125k     |                        8.77 | 8.80 ± 0.46                |        151035 |       2480000 |           388800 |          23678.9 |          2367.1 |
 | Confirmatory | MLE         |    146 | 125k     |                      238.59 | 136.70 ± 1.84              |        151035 |       2480000 |           388800 |          23401.5 |          2388.2 |
 | Confirmatory | MLE         |    147 | 125k     |                       12.48 | 10.99 ± 0.16               |        151035 |       2480000 |           388800 |          23463.9 |          2385.6 |
+| Confirmatory | MLE         |    148 | 125k     |                        9.64 | 10.97 ± 0.71               |        151035 |       2480000 |           388800 |          23673.3 |          2371.7 |
+| Confirmatory | MLE         |    149 | 125k     |                        5.04 | 5.28 ± 0.06                |        151035 |       2480000 |           388800 |          23643.1 |          2370.4 |
+| Confirmatory | MLE         |    150 | 125k     |                        9.39 | 9.84 ± 0.28                |        151035 |       2480000 |           388800 |          23277.6 |          2367.8 |
+| Confirmatory | MLE         |    151 | 125k     |                       28.07 | 24.95 ± 1.89               |        151035 |       2480000 |           388800 |          22608.7 |          2370.1 |
 | Confirmatory | VAGRAM      |    142 | 125k     |                      335.04 | 302.16 ± 1.64              |        151035 |       2480000 |           388800 |          25397.9 |          2529   |
 | Confirmatory | VAGRAM      |    143 | 125k     |                      777.76 | 1031.43 ± 0.62             |        151035 |       2480000 |           388800 |          25488.9 |          2532   |
 | Confirmatory | VAGRAM      |    144 | 125k     |                      566.19 | 1034.20 ± 0.31             |        151035 |       2480000 |           388800 |          25233.8 |          2501.6 |
 | Confirmatory | VAGRAM      |    145 | 125k     |                     1076.3  | 1019.25 ± 0.73             |        151035 |       2480000 |           388800 |          25172.4 |          2495.3 |
 | Confirmatory | VAGRAM      |    146 | 125k     |                      513.06 | 1039.37 ± 0.57             |        151035 |       2480000 |           388800 |          25144.7 |          2525.2 |
 | Confirmatory | VAGRAM      |    147 | 125k     |                      456.65 | 995.97 ± 3.55              |        151035 |       2480000 |           388800 |          25055.3 |          2525.2 |
+| Confirmatory | VAGRAM      |    148 | 125k     |                      649.91 | 437.96 ± 0.80              |        151035 |       2480000 |           388800 |          25255   |          2504   |
+| Confirmatory | VAGRAM      |    149 | 125k     |                      729.49 | 703.48 ± 36.99             |        151035 |       2480000 |           388800 |          25067   |          2505.9 |
+| Confirmatory | VAGRAM      |    150 | 125k     |                      682.8  | 868.75 ± 8.33              |        151035 |       2480000 |           388800 |          23515.5 |          2502.1 |
+| Confirmatory | VAGRAM      |    151 | 125k     |                      753.11 | 978.01 ± 0.60              |        151035 |       2480000 |           388800 |          21872.3 |          2503.8 |
 
 ## 4. Epistemic Demarcation & Interpretation Rules
 
