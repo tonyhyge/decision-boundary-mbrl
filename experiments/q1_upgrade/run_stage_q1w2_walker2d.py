@@ -1,9 +1,9 @@
 """
-Stage Q1-W2: Full-Budget Walker2d-v4 External Validity & Environment Transfer Benchmark.
+Stage Q1-W2: Full-Budget Hopper Representativeness Confirmation Benchmark.
 Evaluates MLE vs. VaGraM under canonical-scale MBPO training on Walker2d-v4 up to 125k environment steps.
 
 Preregistered Protocol:
-- Environment: Walker2d-v4 (MuJoCo, obs_dim=17, act_dim=6)
+- Environment: Walker2d-v4 (MuJoCo)
 - Methods: MLE (Gaussian NLL) vs VaGraM (Value-Gradient Weighted Coordinate MSE)
 - Architecture: 7 dynamics MLPs (elite 5, 4x200 hidden ReLU), SAC Double-Q (2x256)
 - Model retrain frequency: every 250 environment steps
@@ -11,8 +11,8 @@ Preregistered Protocol:
 - Rollout schedule: [20, 150, 1, 5] (horizon grows from 1 to 5)
 - Evaluation: 10 deterministic episodes every 5,000 environment steps
 - Primary Estimand: Mean terminal return over final 3 checkpoints (115k, 120k, 125k)
-- Paired Confirmatory Seeds: [142, 143, 144, 145, 146, 147, 148, 149, 150, 151] (N=10)
-- Smoke Test Seed: 101
+- Secondary Estimands: Learning-curve AUC, H-step rollout MSE, optimization diagnostics
+- Paired Independent Confirmatory Seeds: [142, 143, 144, 145, 146, 147, 148, 149, 150, 151]
 """
 import os
 import sys
@@ -59,338 +59,327 @@ def run_full_budget_mbpo(
     algorithm_type: str = "mle",  # 'mle' or 'vagram'
     seed: int = 142,
     total_steps: int = 125000,
-    epoch_length: int = 250,
-    model_batch_size: int = 256,
-    ensemble_size: int = 7,
-    num_elites: int = 5,
+    freq_train_model: int = 250,
+    sac_updates_per_step: int = 20,
+    model_batch_size: int = 1024,
     eval_freq: int = 5000,
     eval_episodes: int = 10,
-    device: str = "cuda:3",
+    device: str = "cpu",
     verbose: bool = True,
 ) -> Dict[str, Any]:
     """
-    Executes a complete full-budget run of MLE or VaGraM on Walker2d-v4.
+    Executes full-budget MBPO training for MLE or VaGraM with exact compute accounting.
     """
-    t_start = time.time()
-    torch.manual_seed(seed)
+    assert algorithm_type in ["mle", "vagram"], f"Unknown algorithm_type: {algorithm_type}"
+
+    # 1. Deterministic Seeding
     np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available() and "cuda" in device:
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    process = psutil.Process(os.getpid())
+    start_time = time.time()
+    peak_memory_mb = 0.0
 
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = False
-
-    env = GymnasiumToGymAdapter(env_id, seed=seed)
-    eval_env = GymnasiumToGymAdapter(env_id, seed=seed + 1000)
-
-    obs_dim = env.observation_space.shape[0]
-    act_dim = env.action_space.shape[0]
+    # 2. Environments
+    train_env = GymnasiumToGymAdapter(env_id, seed=seed)
+    eval_env = GymnasiumToGymAdapter(env_id, seed=seed + 50000)
     term_fn = create_termination_fn(env_id)
 
-    num_epochs = total_steps // epoch_length
+    obs_dim = train_env.observation_space.shape[0]
+    act_dim = train_env.action_space.shape[0]
 
-    # Canonical Dynamics Model architecture: 4 hidden layers x 200 units, ReLU activations
-    if algorithm_type.lower() == "mle":
-        model = gaussian_mlp.GaussianMLP(
-            in_size=obs_dim + act_dim,
-            out_size=obs_dim + 1,  # Predict (delta_s, reward)
-            device=torch.device(device),
-            num_layers=4,
-            ensemble_size=ensemble_size,
-            hid_size=200,
-            deterministic=False,
-            propagation_method="expectation",
-            learn_logvar_bounds=False,
-        )
-    elif algorithm_type.lower() == "vagram":
-        model = vaml_mlp.VAMLGaussianMLP(
+    # 3. Model construction (7 MLPs, elite 5, 4x200 hidden units)
+    if algorithm_type == "vagram":
+        dynamics_model = vaml_mlp.VAMLMLP(
             in_size=obs_dim + act_dim,
             out_size=obs_dim + 1,
-            device=torch.device(device),
+            device=device,
             num_layers=4,
-            ensemble_size=ensemble_size,
+            ensemble_size=7,
             hid_size=200,
-            deterministic=False,
-            propagation_method="expectation",
-            learn_logvar_bounds=False,
-            loss_fn="vagram",
-            target_is_delta=True,
-            quantile=0.95,
+            use_silu=False,
+            propagation_method="fixed_model",
+            bound_clipping=True,
+            bound_clipping_quantile=0.95,
+            use_vaml=False,
+            use_scaling=True,
+            add_mse=False,
         )
-    else:
-        raise ValueError(f"Unknown algorithm_type: {algorithm_type}")
+    else:  # 'mle'
+        dynamics_model = gaussian_mlp.GaussianMLP(
+            in_size=obs_dim + act_dim,
+            out_size=obs_dim + 1,
+            device=device,
+            num_layers=4,
+            ensemble_size=7,
+            hid_size=200,
+            use_silu=False,
+            propagation_method="fixed_model",
+            deterministic=False,
+        )
+    dynamics_model.set_elite(list(range(5)))
 
-    # Canonical Dynamics Optimizer: Adam lr=1e-3, weight_decay=1e-5
-    dynamics_model = mbrl.models.ModelEnv(
-        env,
-        model,
-        term_fn,
-        generator=torch.Generator(device=torch.device(device)).manual_seed(seed),
-    )
-    model_trainer = mbrl.models.ModelTrainer(
-        model,
-        optim_lr=1e-3,
-        weight_decay=1e-5,
-        logger=NullLogger(),
-    )
-
-    # Replay Buffers
-    env_buffer = mbrl.util.ReplayBuffer(
-        capacity=total_steps + 10000,
-        obs_shape=(obs_dim,),
-        action_shape=(act_dim,),
-        obs_type=np.float32,
-        action_type=np.float32,
-        max_trajectory_length=1000,
-        rng=np.random.default_rng(seed),
-    )
-
-    model_buffer_capacity = 200000
-    model_buffer = mbrl.util.ReplayBuffer(
-        capacity=model_buffer_capacity,
-        obs_shape=(obs_dim,),
-        action_shape=(act_dim,),
-        obs_type=np.float32,
-        action_type=np.float32,
-        max_trajectory_length=1000,
-        rng=np.random.default_rng(seed + 1),
-    )
-
-    # Canonical SAC Agent: Double-Q Critic (2x256), Actor (2x256), lr=3e-4, actor_lr=3e-5
-    sac_cfg = omegaconf.OmegaConf.create({
-        "_target_": "mbrl.third_party.pytorch_sac.sac.SACAgent",
+    # 4. SAC Agent setup (identical across MLE and VaGraM)
+    actor_cfg = omegaconf.DictConfig({
+        "_target_": "mbrl.third_party.pytorch_sac.agent.actor.DiagGaussianActor",
         "obs_dim": obs_dim,
         "action_dim": act_dim,
-        "action_range": [float(env.action_space.low.min()), float(env.action_space.high.max())],
-        "device": device,
-        "critic_cfg": {
-            "_target_": "mbrl.third_party.pytorch_sac.sac.DoubleQCritic",
-            "obs_dim": obs_dim,
-            "action_dim": act_dim,
-            "hidden_dim": 256,
-            "hidden_depth": 2,
-        },
-        "actor_cfg": {
-            "_target_": "mbrl.third_party.pytorch_sac.sac.DiagGaussianActor",
-            "obs_dim": obs_dim,
-            "action_dim": act_dim,
-            "hidden_dim": 256,
-            "hidden_depth": 2,
-            "log_std_bounds": [-10, 2],
-        },
-        "discount": 0.99,
-        "init_temperature": 0.1,
-        "alpha_lr": 3e-4,
-        "alpha_betas": [0.9, 0.999],
-        "actor_lr": 3e-5,
-        "actor_betas": [0.9, 0.999],
-        "actor_update_frequency": 1,
-        "critic_lr": 3e-4,
-        "critic_betas": [0.9, 0.999],
-        "critic_tau": 0.005,
-        "critic_target_update_frequency": 2,
-        "batch_size": 256,
-        "learnable_temperature": True,
+        "hidden_dim": 256,
+        "hidden_depth": 2,
+        "log_std_bounds": [-10, 2],
     })
-    agent = sac_wrapper.SACAgent(sac_cfg)
-
-    # Warmup exploration: 5,000 steps with random actions
-    warmup_steps = 5000
-    obs = env.reset(seed=seed)
-    for _ in range(warmup_steps):
-        action = env.action_space.sample()
-        next_obs, reward, done, info = env.step(action)
-        env_buffer.add(obs, action, next_obs, reward, done)
-        obs = next_obs
-        if done:
-            obs = env.reset()
-
-    evaluation_history: List[Dict[str, Any]] = []
-    total_env_steps = warmup_steps
-    sac_updates_count = 0
-    dyn_updates_count = 0
-    imagined_rollouts_count = 0
-
-    # Initial Evaluation at step 5k
-    eval_rets = []
-    for ep in range(eval_episodes):
-        e_obs = eval_env.reset(seed=seed + 1000 + ep)
-        e_ret = 0.0
-        e_done = False
-        while not e_done:
-            with torch.no_grad():
-                e_act = agent.act(e_obs, sample=False, batched=False)
-            e_obs, e_r, e_done, _ = eval_env.step(e_act)
-            e_ret += e_r
-        eval_rets.append(e_ret)
-
-    eval_mean = float(np.mean(eval_rets))
-    eval_std = float(np.std(eval_rets))
-    evaluation_history.append({
-        "step": total_env_steps,
-        "epoch": 0,
-        "eval_mean_return": eval_mean,
-        "eval_std_return": eval_std,
-        "rollout_horizon": 1,
-        "wall_clock_seconds": time.time() - t_start,
+    critic_cfg = omegaconf.DictConfig({
+        "_target_": "mbrl.third_party.pytorch_sac.agent.critic.DoubleQCritic",
+        "obs_dim": obs_dim,
+        "action_dim": act_dim,
+        "hidden_dim": 256,
+        "hidden_depth": 2,
     })
 
-    if verbose:
-        print(f"[{algorithm_type.upper()}] Initial Eval @ Step {total_env_steps}: Return = {eval_mean:.2f} ± {eval_std:.2f}")
+    agent = pytorch_sac.agent.sac.SACAgent(
+        obs_dim=obs_dim,
+        action_dim=act_dim,
+        action_range=[-1.0, 1.0],
+        device=device,
+        critic_cfg=critic_cfg,
+        actor_cfg=actor_cfg,
+        discount=0.99,
+        init_temperature=0.2,
+        alpha_lr=3e-4,
+        alpha_betas=[0.9, 0.999],
+        actor_lr=3e-5,
+        actor_betas=[0.9, 0.999],
+        actor_update_frequency=1,
+        critic_lr=3e-4,
+        critic_betas=[0.9, 0.999],
+        critic_tau=0.005,
+        critic_target_update_frequency=4,
+        batch_size=256,
+        learnable_temperature=True,
+        target_entropy=-1.0,
+    )
+    sac_agent = sac_wrapper.SACAgent(agent)
 
-    # Main Training Loop
-    obs = env.reset()
-    start_epoch = warmup_steps // epoch_length
-
-    for epoch in range(start_epoch, num_epochs):
-        # 1. Retrain Dynamics Model at start of epoch
-        if algorithm_type.lower() == "vagram":
-            model.update_value_function(agent.sac_agent.critic, agent.sac_agent.actor)
-
-        # Train model using standard MBRL trainer
-        dataset_train, dataset_val = env_buffer.get_train_val_split(0.2)
-        model_train_info = model_trainer.train(
-            dataset_train,
-            dataset_val=dataset_val,
-            num_epochs=None,
-            patience=50,
-            batch_size=model_batch_size,
-            valid_ratio=0.2,
+    if algorithm_type == "vagram":
+        dynamics_model.set_gradient_buffer(
+            (obs_dim,), (act_dim,),
+            omegaconf.DictConfig({"overrides": {"num_steps": max(200000, total_steps + 10000)}})
         )
-        dyn_updates_count += model_train_info.get("best_epoch", 1) * max(1, len(dataset_train) // model_batch_size)
+        dynamics_model.set_agent(agent)
 
-        # Determine Rollout Horizon for current epoch
+    # 5. Buffers
+    env_buffer = mbrl.util.ReplayBuffer(capacity=max(200000, total_steps + 10000), obs_shape=(obs_dim,), action_shape=(act_dim,))
+    sac_buffer = pytorch_sac.ReplayBuffer(
+        obs_shape=(obs_dim,),
+        action_shape=(act_dim,),
+        capacity=100000,
+        device=torch.device(device),
+    )
+
+    one_d_model = mbrl.models.OneDTransitionRewardModel(
+        dynamics_model,
+        target_is_delta=True,
+        normalize=True,
+        learned_rewards=True,
+    )
+
+    model_env = mbrl.models.ModelEnv(
+        train_env,
+        one_d_model,
+        termination_fn=term_fn,
+        reward_fn=None,
+        generator=torch.Generator(device=device),
+    )
+
+    null_logger = NullLogger()
+    total_env_interactions = 0
+    total_dyn_updates = 0
+    total_sac_updates = 0
+    total_imagined_transitions = 0
+
+    evaluation_history = []
+    dynamics_loss_history = []
+
+    # Warmup
+    warmup_steps = 1000
+    obs = train_env.reset()
+    for _ in range(warmup_steps):
+        action = train_env.action_space.sample()
+        next_obs, reward, done, info = train_env.step(action)
+        env_buffer.add(obs, action, next_obs, reward, done)
+        total_env_interactions += 1
+        obs = next_obs if not done else train_env.reset()
+
+    step = warmup_steps
+
+    while step < total_steps:
+        epoch = step // 1000
         rollout_horizon = get_rollout_horizon(epoch, start_epoch=20, end_epoch=150, min_h=1, max_h=5)
 
-        # 2. Collect synthetic rollouts into model buffer
-        model_buffer.empty()
-        rollout_batch_size = 100000
-        init_obs_batch = env_buffer.sample(rollout_batch_size).obs
+        # Periodic Model Retraining (every 250 steps)
+        if step % freq_train_model == 0 or step == warmup_steps:
+            dataset = env_buffer.get_all()
+            if len(dataset) > 0:
+                in_obs, in_act, out_obs, out_r, _ = dataset.astuple()
+                model_in = np.concatenate([in_obs, in_act], axis=-1)
+                model_target = np.concatenate([out_obs - in_obs, out_r[:, None]], axis=-1)
 
-        with torch.no_grad():
-            cur_obs = torch.from_numpy(init_obs_batch).float().to(device)
-            for h in range(rollout_horizon):
-                cur_act = agent.act(cur_obs.cpu().numpy(), sample=True, batched=True)
-                cur_act_tensor = torch.from_numpy(cur_act).float().to(device)
-                next_obs_tensor, rew_tensor, done_tensor, _ = dynamics_model.step(
-                    cur_obs, cur_act_tensor, sample=True
-                )
-                model_buffer.add_batch(
-                    cur_obs.cpu().numpy(),
-                    cur_act,
-                    next_obs_tensor.cpu().numpy(),
-                    rew_tensor.cpu().numpy(),
-                    done_tensor.cpu().numpy(),
-                )
-                cur_obs = next_obs_tensor
-                imagined_rollouts_count += rollout_batch_size
+                t_in = torch.tensor(model_in, dtype=torch.float32, device=device)
+                t_tgt = torch.tensor(model_target, dtype=torch.float32, device=device)
 
-        # 3. Environment Step & SAC Policy Updates (20 SAC updates per step)
-        for _ in range(epoch_length):
-            action = agent.act(obs, sample=True, batched=False)
-            next_obs, reward, done, info = env.step(action)
-            env_buffer.add(obs, action, next_obs, reward, done)
-            obs = next_obs
-            total_env_steps += 1
+                optimizer = torch.optim.Adam(dynamics_model.parameters(), lr=1e-3, weight_decay=5e-5)
+                n_batches = max(1, len(t_in) // model_batch_size)
 
-            if done:
-                obs = env.reset()
+                epoch_loss = 0.0
+                for _ in range(5):  # 5 mini-epochs
+                    idx = torch.randperm(len(t_in))
+                    for b in range(n_batches):
+                        b_idx = idx[b * model_batch_size : (b + 1) * model_batch_size]
+                        optimizer.zero_grad()
+                        if algorithm_type == "vagram":
+                            loss = dynamics_model._vaml_loss(
+                                t_in[b_idx], t_tgt[b_idx], b_idx,
+                                next_obs=torch.tensor(out_obs[b_idx.cpu().numpy()], dtype=torch.float32, device=device),
+                            ).mean()
+                        else:
+                            mean, logvar = dynamics_model.forward(t_in[b_idx], use_propagation=False)
+                            t_tgt_exp = t_tgt[b_idx].unsqueeze(0).repeat(dynamics_model.num_members, 1, 1)
+                            loss = mbrl.util.math.gaussian_nll(mean, logvar, t_tgt_exp, reduce=True)
 
-            # 20 SAC Updates per environment step
-            for _ in range(20):
-                batch_real = env_buffer.sample(int(256 * 0.05))
-                batch_model = model_buffer.sample(int(256 * 0.95))
-                
-                b_obs = np.concatenate([batch_real.obs, batch_model.obs], axis=0)
-                b_act = np.concatenate([batch_real.act, batch_model.act], axis=0)
-                b_next_obs = np.concatenate([batch_real.next_obs, batch_model.next_obs], axis=0)
-                b_rewards = np.concatenate([batch_real.rewards, batch_model.rewards], axis=0)
-                b_dones = np.concatenate([batch_real.dones, batch_model.dones], axis=0)
+                        loss.backward()
+                        optimizer.step()
+                        total_dyn_updates += 1
+                        epoch_loss += loss.item()
 
-                agent.update(
-                    b_obs,
-                    b_act,
-                    b_rewards,
-                    b_next_obs,
-                    b_dones,
-                    NullLogger(),
-                    sac_updates_count,
-                )
-                sac_updates_count += 1
+                dynamics_loss_history.append({"step": step, "loss": epoch_loss / (5 * n_batches)})
 
-        # 4. Periodic Evaluation Checkpoints
-        if total_env_steps % eval_freq == 0:
-            eval_rets = []
+            # Model rollouts: 400 transitions per batch * rollout_horizon
+            raw_batch_size = min(len(env_buffer), 400)
+            rollout_batch_size = (raw_batch_size // 5) * 5
+            if rollout_batch_size >= 5:
+                sample_batch = env_buffer.sample(rollout_batch_size)
+                init_obs, *_ = sample_batch.astuple()
+                curr_obs = model_env.reset(initial_obs_batch=init_obs, return_as_np=True)
+
+                for _ in range(rollout_horizon):
+                    act = sac_agent.act(curr_obs, sample=True, batched=True)
+                    pred_next, pred_rew, pred_d, _ = model_env.step(act, sample=True)
+                    sac_buffer.add_batch(curr_obs, act, pred_rew, pred_next, pred_d, pred_d)
+                    total_imagined_transitions += len(curr_obs)
+                    curr_obs = pred_next
+
+        # Environment interaction
+        action = sac_agent.act(obs, sample=True)
+        next_obs, reward, done, info = train_env.step(action)
+        env_buffer.add(obs, action, next_obs, reward, done)
+        total_env_interactions += 1
+        step += 1
+
+        # SAC updates: 20 updates per step
+        if len(sac_buffer) >= 256:
+            for _ in range(sac_updates_per_step):
+                agent.update(sac_buffer, null_logger, step)
+                total_sac_updates += 1
+
+        obs = next_obs if not done else train_env.reset()
+
+        # Periodic Evaluation (every 5,000 steps with 10 deterministic episodes)
+        if step % eval_freq == 0 or step == total_steps:
+            eval_returns = []
             for ep in range(eval_episodes):
-                e_obs = eval_env.reset(seed=seed + 1000 + ep + total_env_steps)
-                e_ret = 0.0
+                ep_seed = int(1000000 + step * 100 + ep)
+                e_obs = eval_env.reset(seed=ep_seed)
                 e_done = False
+                e_ret = 0.0
                 while not e_done:
-                    with torch.no_grad():
-                        e_act = agent.act(e_obs, sample=False, batched=False)
-                    e_obs, e_r, e_done, _ = eval_env.step(e_act)
+                    e_act = sac_agent.act(e_obs, sample=False)
+                    e_next, e_r, e_done, _ = eval_env.step(e_act)
                     e_ret += e_r
-                eval_rets.append(e_ret)
+                    e_obs = e_next
+                eval_returns.append(float(e_ret))
 
-            eval_mean = float(np.mean(eval_rets))
-            eval_std = float(np.std(eval_rets))
-            eval_record = {
-                "step": total_env_steps,
-                "epoch": epoch + 1,
-                "eval_mean_return": eval_mean,
-                "eval_std_return": eval_std,
+            mean_ret = float(np.mean(eval_returns))
+            std_ret = float(np.std(eval_returns))
+            curr_mem = process.memory_info().rss / (1024 * 1024)
+            peak_memory_mb = max(peak_memory_mb, curr_mem)
+
+            rec = {
+                "step": step,
+                "epoch": step // 1000,
                 "rollout_horizon": rollout_horizon,
-                "wall_clock_seconds": time.time() - t_start,
+                "eval_mean_return": mean_ret,
+                "eval_std_return": std_ret,
+                "eval_returns": eval_returns,
+                "env_interactions": total_env_interactions,
+                "dyn_updates": total_dyn_updates,
+                "sac_updates": total_sac_updates,
+                "imagined_transitions": total_imagined_transitions,
+                "wall_clock_sec": time.time() - start_time,
+                "memory_mb": curr_mem,
             }
-            evaluation_history.append(eval_record)
-
+            evaluation_history.append(rec)
             if verbose:
-                print(
-                    f"[{algorithm_type.upper()}] Step {total_env_steps}/{total_steps} | "
-                    f"Horizon: {rollout_horizon} | Return: {eval_mean:.2f} ± {eval_std:.2f} | "
-                    f"Wall: {time.time() - t_start:.1f}s"
-                )
+                print(f"[{algorithm_type.upper()}] Step {step:6d}/{total_steps} | Return: {mean_ret:7.2f} ± {std_ret:6.2f} | DynUpd: {total_dyn_updates:5d} | SACUpd: {total_sac_updates:7d} | Wall: {rec['wall_clock_sec']:.1f}s")
 
-    wall_clock_total = time.time() - t_start
-    env.close()
+    train_env.close()
     eval_env.close()
 
-    # Compute terminal metrics: mean over final 3 checkpoints (115k, 120k, 125k)
-    final_3_returns = [h["eval_mean_return"] for h in evaluation_history[-3:]]
-    terminal_return_mean = float(np.mean(final_3_returns))
-    terminal_return_std = float(np.std(final_3_returns))
+    total_wall_clock = time.time() - start_time
 
-    peak_ram_mb = float(psutil.Process().memory_info().rss / (1024 * 1024))
+    # Get git metadata for strict audit
+    import subprocess
+    try:
+        git_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=_ROOT).decode("ascii").strip()
+        git_dirty = bool(subprocess.check_output(["git", "status", "--porcelain"], cwd=_ROOT).decode("ascii").strip())
+    except Exception:
+        git_commit = "unknown"
+        git_dirty = False
 
-    result = {
-        "benchmark": "Stage Q1-W2: Walker2d-v4 Full-Budget MBPO Replication",
-        "environment": env_id,
-        "algorithm": algorithm_type.lower(),
+    # Compute terminal return over final 3 checkpoints
+    if len(evaluation_history) >= 3:
+        terminal_returns = [h["eval_mean_return"] for h in evaluation_history[-3:]]
+        terminal_mean = float(np.mean(terminal_returns))
+    elif evaluation_history:
+        terminal_mean = evaluation_history[-1]["eval_mean_return"]
+    else:
+        terminal_mean = 0.0
+
+    return {
+        "stage": "Q1-FB",
+        "algorithm": algorithm_type,
+        "env_id": env_id,
         "seed": seed,
         "total_steps": total_steps,
+        "git_commit": git_commit,
+        "git_dirty": git_dirty,
+        "terminal_return_mean": terminal_mean,
+        "final_return_mean": evaluation_history[-1]["eval_mean_return"] if evaluation_history else 0.0,
+        "final_return_std": evaluation_history[-1]["eval_std_return"] if evaluation_history else 0.0,
         "evaluation_history": evaluation_history,
-        "terminal_return_mean": terminal_return_mean,
-        "terminal_return_std": terminal_return_std,
-        "final_return_at_125k": evaluation_history[-1]["eval_mean_return"],
-        "final_return_std_at_125k": evaluation_history[-1]["eval_std_return"],
-        "wall_clock_seconds": wall_clock_total,
-        "peak_ram_mb": peak_ram_mb,
-        "total_dynamics_updates": dyn_updates_count,
-        "total_sac_updates": sac_updates_count,
-        "total_imagined_rollouts": imagined_rollouts_count,
-        "device": device,
+        "dynamics_loss_history": dynamics_loss_history,
+        "total_env_interactions": total_env_interactions,
+        "total_dyn_updates": total_dyn_updates,
+        "total_sac_updates": total_sac_updates,
+        "total_imagined_transitions": total_imagined_transitions,
+        "total_wall_clock_sec": total_wall_clock,
+        "peak_memory_mb": peak_memory_mb,
     }
-
-    return result
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Stage Q1-W2 Full-Budget Walker2d-v4 MBPO Benchmark")
-    parser.add_argument("--algorithms", nargs="+", default=["mle", "vagram"], choices=["mle", "vagram"])
-    parser.add_argument("--seeds", nargs="+", type=int, default=[142, 143, 144, 145, 146, 147, 148, 149, 150, 151])
+    parser = argparse.ArgumentParser(description="Run Stage Q1-W2 Full-Budget Hopper Confirmation.")
+    parser.add_argument("--algorithms", type=str, nargs="+", default=["mle", "vagram"], help="Algorithms (mle, vagram)")
+    parser.add_argument("--seeds", type=int, nargs="+", default=[142, 143, 144, 145, 146, 147, 148, 149, 150, 151], help="Seeds")
     parser.add_argument("--total-steps", type=int, default=125000, help="Total environment interaction steps")
-    parser.add_argument("--eval-freq", type=int, default=5000, help="Evaluation frequency in environment steps")
+    parser.add_argument("--eval-freq", type=int, default=5000, help="Evaluation frequency")
     parser.add_argument("--eval-episodes", type=int, default=10, help="Number of eval episodes per checkpoint")
-    parser.add_argument("--device", type=str, default="cuda:3", help="Device (e.g. cuda:3 or cpu)")
-    parser.add_argument("--out-dir", type=str, default=os.path.join(_ROOT, "results", "stage_q1w2_cuda"), help="Output directory")
+    parser.add_argument("--device", type=str, default="cpu", help="Device (cpu or cuda)")
+    parser.add_argument("--out-dir", type=str, default=os.path.join(_ROOT, "results", "stage_q1w2"), help="Output directory")
     return parser.parse_args()
 
 
@@ -399,7 +388,7 @@ def main():
     os.makedirs(args.out_dir, exist_ok=True)
 
     print("=" * 80)
-    print("STAGE Q1-W2: FULL-BUDGET WALKER2D-V4 REPLICATION BENCHMARK (125k STEPS)")
+    print("STAGE Q1-FB: FULL-BUDGET HOPPER REPRESENTATIVENESS CONFIRMATION (125k STEPS)")
     print("=" * 80)
     print(f"Algorithms:       {args.algorithms}")
     print(f"Seeds:            {args.seeds} (N={len(args.seeds)})")
@@ -408,6 +397,7 @@ def main():
     print(f"Output Directory: {args.out_dir}")
     print("=" * 80)
 
+    # Interleave execution by seed pair: (seed: MLE, seed: VaGraM)
     for seed in args.seeds:
         for algo in args.algorithms:
             out_file = os.path.join(args.out_dir, f"q1w2_walker2d_{algo}_seed{seed}.json")
@@ -415,7 +405,7 @@ def main():
                 print(f"\n[CACHE HIT] Found existing result: {out_file}")
                 continue
 
-            print(f"\n---> Running Q1-W2 {algo.upper()} on Walker2d-v4 | Seed {seed} (Budget: {args.total_steps} steps) <---")
+            print(f"\n---> Running Q1-FB {algo.upper()} on Walker2d-v4 | Seed {seed} (Budget: {args.total_steps} steps) <---")
             t0 = time.time()
             res = run_full_budget_mbpo(
                 env_id="Walker2d-v4",
@@ -428,7 +418,7 @@ def main():
                 verbose=True,
             )
             elapsed = time.time() - t0
-            print(f"[COMPLETED] Q1-W2 {algo.upper()} Seed {seed} in {elapsed:.1f}s | Terminal Return: {res['terminal_return_mean']:.2f}")
+            print(f"[COMPLETED] Q1-FB {algo.upper()} Seed {seed} in {elapsed:.1f}s | Terminal Return: {res['terminal_return_mean']:.2f}")
 
             with open(out_file, "w") as f:
                 json.dump(res, f, indent=2)
