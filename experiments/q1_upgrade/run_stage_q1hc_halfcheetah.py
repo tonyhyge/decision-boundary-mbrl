@@ -1,0 +1,392 @@
+"""
+Stage Q1-HC: Full-Budget HalfCheetah-v4 Confirmatory Replication Benchmark.
+Evaluates MLE vs. VaGraM under canonical-scale MBPO training on HalfCheetah-v4 up to 125k environment steps.
+
+Preregistered Protocol:
+- Environment: HalfCheetah-v4 (MuJoCo, non-terminating locomotion dynamics)
+- Methods: MLE (Gaussian NLL) vs VaGraM (Value-Gradient Weighted Coordinate MSE)
+- Architecture: 7 dynamics MLPs (elite 5, 4x200 hidden ReLU), SAC Double-Q (2x256)
+- Model retrain frequency: every 250 environment steps
+- SAC policy updates: 20 updates per environment step
+- Rollout schedule: [20, 150, 1, 5] (horizon grows from 1 to 5)
+- Evaluation: 10 deterministic episodes every 5,000 environment steps
+- Primary Estimand: Mean terminal return over final 3 checkpoints (115k, 120k, 125k)
+- Secondary Estimands: Training-budget interaction H_i, dynamics loss history
+- Paired Independent Confirmatory Seeds: [142, 143, 144, 145, 146, 147, 148, 149, 150, 151]
+"""
+import os
+import sys
+import time
+import json
+import psutil
+import argparse
+from typing import Dict, Any, List, Optional
+import numpy as np
+import torch
+import omegaconf
+
+# Ensure project root is in sys.path
+_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+_VAGRAM_PATH = os.path.abspath(os.path.join(_ROOT, "src", "baselines", "external", "vagram"))
+if _VAGRAM_PATH not in sys.path:
+    sys.path.insert(0, _VAGRAM_PATH)
+
+import mbrl.models
+import mbrl.models.vaml_mlp as vaml_mlp
+import mbrl.models.gaussian_mlp as gaussian_mlp
+import mbrl.planning.sac_wrapper as sac_wrapper
+import mbrl.third_party.pytorch_sac as pytorch_sac
+import mbrl.util
+import mbrl.util.math
+from src.baselines.adapters.vagram_mbpo import GymnasiumToGymAdapter, create_termination_fn, NullLogger
+
+
+def get_rollout_horizon(epoch: int, start_epoch: int = 20, end_epoch: int = 150, min_h: int = 1, max_h: int = 5) -> int:
+    """Calculates rollout horizon according to official MBPO/VaGraM schedule [20, 150, 1, 5]."""
+    if epoch <= start_epoch:
+        return min_h
+    if epoch >= end_epoch:
+        return max_h
+    frac = (epoch - start_epoch) / (end_epoch - start_epoch)
+    return int(min_h + np.floor(frac * (max_h - min_h)))
+
+
+def run_full_budget_mbpo(
+    env_id: str = "HalfCheetah-v4",
+    algorithm_type: str = "mle",  # 'mle' or 'vagram'
+    seed: int = 142,
+    total_steps: int = 125000,
+    freq_train_model: int = 250,
+    sac_updates_per_step: int = 20,
+    model_batch_size: int = 1024,
+    eval_freq: int = 5000,
+    eval_episodes: int = 10,
+    device: str = "cpu",
+    verbose: bool = True,
+) -> Dict[str, Any]:
+    """
+    Executes full-budget MBPO training for MLE or VaGraM with exact compute accounting.
+    """
+    assert algorithm_type in ["mle", "vagram"], f"Unknown algorithm_type: {algorithm_type}"
+
+    # 1. Deterministic Seeding
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available() and "cuda" in device:
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+    process = psutil.Process(os.getpid())
+    start_time = time.time()
+    peak_memory_mb = 0.0
+
+    # 2. Environments
+    train_env = GymnasiumToGymAdapter(env_id, seed=seed)
+    eval_env = GymnasiumToGymAdapter(env_id, seed=seed + 50000)
+    term_fn = create_termination_fn(env_id)
+
+    obs_dim = train_env.observation_space.shape[0]
+    act_dim = train_env.action_space.shape[0]
+
+    # 3. Model construction (7 MLPs, elite 5, 4x200 hidden units)
+    if algorithm_type == "vagram":
+        dynamics_model = vaml_mlp.VAMLMLP(
+            in_size=obs_dim + act_dim,
+            out_size=obs_dim + 1,
+            device=device,
+            num_layers=4,
+            ensemble_size=7,
+            hid_size=200,
+            use_silu=False,
+            propagation_method="fixed_model",
+            bound_clipping=True,
+            bound_clipping_quantile=0.95,
+            use_vaml=False,
+            use_scaling=True,
+            add_mse=False,
+        )
+    else:  # 'mle'
+        dynamics_model = gaussian_mlp.GaussianMLP(
+            in_size=obs_dim + act_dim,
+            out_size=obs_dim + 1,
+            device=device,
+            num_layers=4,
+            ensemble_size=7,
+            hid_size=200,
+            use_silu=False,
+            propagation_method="fixed_model",
+            deterministic=False,
+        )
+    dynamics_model.set_elite(list(range(5)))
+
+    # 4. SAC Agent setup (identical across MLE and VaGraM)
+    actor_cfg = omegaconf.DictConfig({
+        "_target_": "mbrl.third_party.pytorch_sac.agent.actor.DiagGaussianActor",
+        "obs_dim": obs_dim,
+        "action_dim": act_dim,
+        "hidden_dim": 256,
+        "hidden_depth": 2,
+        "log_std_bounds": [-10, 2],
+    })
+    critic_cfg = omegaconf.DictConfig({
+        "_target_": "mbrl.third_party.pytorch_sac.agent.critic.DoubleQCritic",
+        "obs_dim": obs_dim,
+        "action_dim": act_dim,
+        "hidden_dim": 256,
+        "hidden_depth": 2,
+    })
+
+    agent = pytorch_sac.agent.sac.SACAgent(
+        obs_dim=obs_dim,
+        action_dim=act_dim,
+        action_range=[-1.0, 1.0],
+        device=device,
+        critic_cfg=critic_cfg,
+        actor_cfg=actor_cfg,
+        discount=0.99,
+        init_temperature=0.2,
+        alpha_lr=3e-4,
+        alpha_betas=[0.9, 0.999],
+        actor_lr=3e-5,
+        actor_betas=[0.9, 0.999],
+        actor_update_frequency=1,
+        critic_lr=3e-4,
+        critic_betas=[0.9, 0.999],
+        critic_tau=0.005,
+        critic_target_update_frequency=4,
+        batch_size=256,
+        learnable_temperature=True,
+        target_entropy=-1.0,
+    )
+    sac_agent = sac_wrapper.SACAgent(agent)
+
+    if algorithm_type == "vagram":
+        dynamics_model.set_gradient_buffer(
+            (obs_dim,), (act_dim,),
+            omegaconf.DictConfig({"overrides": {"num_steps": max(200000, total_steps + 10000)}})
+        )
+        dynamics_model.set_agent(agent)
+
+    # 5. Buffers
+    env_buffer = mbrl.util.ReplayBuffer(capacity=max(200000, total_steps + 10000), obs_shape=(obs_dim,), action_shape=(act_dim,))
+    sac_buffer = pytorch_sac.ReplayBuffer(
+        obs_shape=(obs_dim,),
+        action_shape=(act_dim,),
+        capacity=100000,
+        device=torch.device(device),
+    )
+
+    one_d_model = mbrl.models.OneDTransitionRewardModel(
+        dynamics_model,
+        target_is_delta=True,
+        normalize=True,
+        learned_rewards=True,
+    )
+
+    model_env = mbrl.models.ModelEnv(
+        train_env,
+        one_d_model,
+        termination_fn=term_fn,
+        reward_fn=None,
+        generator=torch.Generator(device=device),
+    )
+
+    null_logger = NullLogger()
+    total_env_interactions = 0
+    total_dyn_updates = 0
+    total_sac_updates = 0
+    total_imagined_transitions = 0
+
+    evaluation_history = []
+    dynamics_loss_history = []
+
+    # Warmup
+    warmup_steps = 1000
+    obs = train_env.reset()
+    for _ in range(warmup_steps):
+        action = train_env.action_space.sample()
+        next_obs, reward, done, info = train_env.step(action)
+        env_buffer.add(obs, action, next_obs, reward, done)
+        total_env_interactions += 1
+        obs = next_obs if not done else train_env.reset()
+
+    step = warmup_steps
+
+    while step < total_steps:
+        epoch = step // 1000
+        rollout_horizon = get_rollout_horizon(epoch, start_epoch=20, end_epoch=150, min_h=1, max_h=5)
+
+        # Periodic Model Retraining (every 250 steps)
+        if step % freq_train_model == 0 or step == warmup_steps:
+            dataset = env_buffer.get_all()
+            if len(dataset) > 0:
+                in_obs, in_act, out_obs, out_r, _ = dataset.astuple()
+                model_in = np.concatenate([in_obs, in_act], axis=-1)
+                model_target = np.concatenate([out_obs - in_obs, out_r[:, None]], axis=-1)
+
+                t_in = torch.tensor(model_in, dtype=torch.float32, device=device)
+                t_tgt = torch.tensor(model_target, dtype=torch.float32, device=device)
+
+                optimizer = torch.optim.Adam(dynamics_model.parameters(), lr=1e-3, weight_decay=5e-5)
+                n_batches = max(1, len(t_in) // model_batch_size)
+
+                epoch_loss = 0.0
+                for _ in range(5):  # 5 mini-epochs
+                    idx = torch.randperm(len(t_in))
+                    for b in range(n_batches):
+                        b_idx = idx[b * model_batch_size : (b + 1) * model_batch_size]
+                        optimizer.zero_grad()
+                        if algorithm_type == "vagram":
+                            loss = dynamics_model._vaml_loss(
+                                t_in[b_idx], t_tgt[b_idx], b_idx,
+                                next_obs=torch.tensor(out_obs[b_idx.cpu().numpy()], dtype=torch.float32, device=device),
+                            ).mean()
+                        else:
+                            mean, logvar = dynamics_model.forward(t_in[b_idx], use_propagation=False)
+                            t_tgt_exp = t_tgt[b_idx].unsqueeze(0).repeat(dynamics_model.num_members, 1, 1)
+                            loss = mbrl.util.math.gaussian_nll(mean, logvar, t_tgt_exp, reduce=True)
+
+                        loss.backward()
+                        optimizer.step()
+                        total_dyn_updates += 1
+                        epoch_loss += loss.item()
+
+                dynamics_loss_history.append({"step": step, "loss": epoch_loss / (5 * n_batches)})
+
+            # Model rollouts: 400 transitions per batch * rollout_horizon
+            raw_batch_size = min(len(env_buffer), 400)
+            rollout_batch_size = (raw_batch_size // 5) * 5
+            if rollout_batch_size >= 5:
+                sample_batch = env_buffer.sample(rollout_batch_size)
+                init_obs, *_ = sample_batch.astuple()
+                curr_obs = model_env.reset(initial_obs_batch=init_obs, return_as_np=True)
+
+                for _ in range(rollout_horizon):
+                    act = sac_agent.act(curr_obs, sample=True, batched=True)
+                    pred_next, pred_rew, pred_d, _ = model_env.step(act, sample=True)
+                    sac_buffer.add_batch(curr_obs, act, pred_rew, pred_next, pred_d, pred_d)
+                    total_imagined_transitions += len(curr_obs)
+                    curr_obs = pred_next
+
+        # Environment interaction
+        action = sac_agent.act(obs, sample=True)
+        next_obs, reward, done, info = train_env.step(action)
+        env_buffer.add(obs, action, next_obs, reward, done)
+        total_env_interactions += 1
+        step += 1
+
+        # SAC updates: 20 updates per step
+        if len(sac_buffer) >= 256:
+            for _ in range(sac_updates_per_step):
+                agent.update(sac_buffer, null_logger, step)
+                total_sac_updates += 1
+
+        obs = next_obs if not done else train_env.reset()
+
+        # Periodic Evaluation (every 5,000 steps with 10 deterministic episodes)
+        if step % eval_freq == 0 or step == total_steps:
+            eval_returns = []
+            for ep in range(eval_episodes):
+                ep_seed = int(1000000 + step * 100 + ep)
+                e_obs = eval_env.reset(seed=ep_seed)
+                e_done = False
+                e_ret = 0.0
+                while not e_done:
+                    e_act = sac_agent.act(e_obs, sample=False)
+                    e_next, e_rew, e_done, _ = eval_env.step(e_act)
+                    e_ret += e_rew
+                    e_obs = e_next
+                eval_returns.append(e_ret)
+
+            mean_eval = float(np.mean(eval_returns))
+            std_eval = float(np.std(eval_returns))
+            mem_mb = process.memory_info().rss / (1024 * 1024)
+            peak_memory_mb = max(peak_memory_mb, mem_mb)
+            evaluation_history.append({
+                "step": step,
+                "eval_mean_return": mean_eval,
+                "eval_std_return": std_eval,
+                "eval_episodes": eval_returns,
+            })
+            if verbose:
+                elapsed = time.time() - start_time
+                print(f"[{algorithm_type.upper()}] Step {step}/{total_steps} | Return: {mean_eval:7.2f} +/- {std_eval:6.2f} | DynUp: {total_dyn_updates:6d} | SACUp: {total_sac_updates:7d} | Wall: {elapsed:6.1f}s | RAM: {mem_mb:6.1f}MB")
+
+    # Final compute summary & artifact assembly
+    wall_clock = time.time() - start_time
+    terminal_returns = [h["eval_mean_return"] for h in evaluation_history if h["step"] in [115000, 120000, 125000]]
+    terminal_mean = float(np.mean(terminal_returns)) if len(terminal_returns) == 3 else float(np.mean([h["eval_mean_return"] for h in evaluation_history[-3:]]))
+
+    return {
+        "env_id": env_id,
+        "algorithm": algorithm_type,
+        "seed": seed,
+        "total_steps": total_steps,
+        "terminal_return_mean": terminal_mean,
+        "terminal_window_returns": terminal_returns,
+        "evaluation_history": evaluation_history,
+        "dynamics_loss_history": dynamics_loss_history,
+        "total_env_interactions": total_env_interactions,
+        "total_dyn_updates": total_dyn_updates,
+        "total_sac_updates": total_sac_updates,
+        "total_imagined_transitions": total_imagined_transitions,
+        "total_wall_clock_sec": wall_clock,
+        "peak_memory_mb": peak_memory_mb,
+        "device": device,
+        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Stage Q1-HC HalfCheetah-v4 Confirmatory MBPO Runner")
+    parser.add_argument("--algorithms", nargs="+", default=["mle", "vagram"], choices=["mle", "vagram"])
+    parser.add_argument("--seeds", nargs="+", type=int, default=[142])
+    parser.add_argument("--total-steps", type=int, default=125000)
+    parser.add_argument("--freq-train-model", type=int, default=250)
+    parser.add_argument("--sac-updates-per-step", type=int, default=20)
+    parser.add_argument("--model-batch-size", type=int, default=1024)
+    parser.add_argument("--eval-freq", type=int, default=5000)
+    parser.add_argument("--eval-episodes", type=int, default=10)
+    parser.add_argument("--device", type=str, default="cuda:0")
+    parser.add_argument("--out-dir", type=str, default="results/stage_q1hc_cuda")
+    args = parser.parse_args()
+
+    os.makedirs(args.out_dir, exist_ok=True)
+
+    for seed in args.seeds:
+        for algo in args.algorithms:
+            out_file = os.path.join(args.out_dir, f"q1hc_halfcheetah_{algo}_seed{seed}.json")
+            if os.path.exists(out_file):
+                print(f"Found existing result {out_file}, skipping...")
+                continue
+
+            print(f"\n========================================================")
+            print(f"STARTING: HalfCheetah-v4 | Algo: {algo.upper()} | Seed: {seed} | Device: {args.device}")
+            print(f"========================================================")
+
+            res = run_full_budget_mbpo(
+                env_id="HalfCheetah-v4",
+                algorithm_type=algo,
+                seed=seed,
+                total_steps=args.total_steps,
+                freq_train_model=args.freq_train_model,
+                sac_updates_per_step=args.sac_updates_per_step,
+                model_batch_size=args.model_batch_size,
+                eval_freq=args.eval_freq,
+                eval_episodes=args.eval_episodes,
+                device=args.device,
+                verbose=True,
+            )
+
+            with open(out_file, "w") as f:
+                json.dump(res, f, indent=2)
+            print(f"Saved result to {out_file}")
+
+
+if __name__ == "__main__":
+    sys.exit(main())
