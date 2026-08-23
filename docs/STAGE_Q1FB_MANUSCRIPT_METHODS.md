@@ -97,11 +97,27 @@ $$H_i = \Delta_i(125\mathrm{k}) - \Delta_i(10\mathrm{k}) = \left( J_i^{\mathrm{V
 | **149** | 5.04 | 729.49 | **+724.46** | VaGraM | +145.04 | +698.20 | +553.16 |
 | **150** | 9.39 | 682.80 | **+673.41** | VaGraM | +307.84 | +858.91 | +551.06 |
 | **151** | 28.07 | 753.11 | **+725.04** | VaGraM | +67.23 | +953.05 | +885.82 |
-
 ### Primary Statistical Inferences ($N=10$ Confirmatory Cohort):
 - **Mean Paired Terminal Return Delta $\bar{\Delta}$:** **`+620.09`**
 - **95% Paired Percentile Bootstrap CI:** **`[+485.66, +756.46]`**
 - **Exact Permutation Sign-Flip $p$-value ($2^{10} = 1024$):** **`p = 0.00195` ($2 / 1024$)**
-- **Confirmatory Win Rate:** **`10 / 10 (100.0%)`**
-- **Training-Budget Advantage Shift Mean $\bar{H}$:** **`+609.32`** (95% CI: `[+265.39, +843.58]`, `p = 0.00977`, 9/10 positive)
+- **Terminal Win Rate:** **`10 / 10 (100.0%)`** (descriptive count)
+- **Training-Budget Advantage Shift Mean $\bar{H}$:** **`+609.32`** (95% CI: `[+265.39, +843.58]`, exact sign-flip `p = 0.00977`, 9/10 positive shifts)
 - **Descriptive Runtime Overhead:** **`+5.1%`** under audited concurrent CUDA execution ($6.87\text{ h}$ vs $6.53\text{ h}$).
+
+---
+
+## 6. Cross-Environment Replication: Walker2d-v4 ($N=10$) & Locomotion Transfer
+
+To test the external validity of the value-aware objective beyond Hopper-v4, Stage Q1-W2 conducted an un-tuned confirmatory replication on **`Walker2d-v4`** across the identical $N=10$ paired seeds ($[142, \dots, 151]$, 125,000 steps each).
+
+### 6.1 Statistical Results on Walker2d-v4:
+- **Mean Paired Terminal Delta $\bar{\Delta}$:** **`+239.51`**
+- **95% Paired Percentile Bootstrap CI:** **`[+133.51, +356.58]`**
+- **Exact Permutation Sign-Flip $p$-value ($2^{10} = 1024$):** **`p = 0.001953` ($2 / 1024$)**
+- **Terminal Win Rate:** **`10 / 10 (100.0%)`** (all 10 seeds positive on the preregistered 3-checkpoint terminal window; min $\Delta_i = +2.97$)
+- **Training-Budget Advantage Shift Mean $\bar{H}$:** **`+172.24`** (95% CI: `[+10.99, +327.91]`, exact sign-flip `p = 0.0371`, 7/10 positive shifts)
+- **Descriptive Runtime Overhead:** **`+4.7%`** ($4.46\text{ h}$ vs $4.26\text{ h}$).
+
+### 6.2 Cross-Environment Synthesis & Scope Boundary:
+Across both tested MuJoCo locomotion environments, VaGraM consistently outperformed standard MLE on the terminal evaluation window under fixed MBPO hyperparameters. Early advantages at 10k steps exhibited seed-level heterogeneity ($\bar{\Delta}_{10\mathrm{k}} = +72.32$ on Walker2d, $+208.55$ on Hopper), while mature 125k training budgets enabled consistent positive policy utility across both locomotion topologies.
