@@ -59,11 +59,12 @@ def audit_run(seed: int, method: str) -> dict:
                 has_nan = True
                 break
                 
-        dyn_up = data.get("total_dynamics_updates", 0)
+        dyn_up = data.get("total_dyn_updates", data.get("total_dynamics_updates", 0))
         sac_up = data.get("total_sac_updates", 0)
-        rollouts = data.get("total_imagined_rollouts", 0)
-        wall_s = data.get("wall_clock_seconds", 0.0)
-        peak_ram = data.get("peak_ram_mb", 0.0)
+        rollouts = data.get("total_imagined_transitions", data.get("total_imagined_rollouts", 0))
+        wall_s = data.get("total_wall_clock_sec", data.get("wall_clock_seconds", 0.0))
+        peak_ram = data.get("peak_memory_mb", data.get("peak_ram_mb", 0.0))
+        git_commit = data.get("git_commit", "N/A")[:8]
         
         is_pass = (
             steps == EXPECTED_STEPS
@@ -87,6 +88,7 @@ def audit_run(seed: int, method: str) -> dict:
             "No NaN/Inf": "PASS" if not has_nan else "FAIL",
             "Wall Clock (s)": round(wall_s, 1),
             "Peak RAM (MB)": round(peak_ram, 1),
+            "Git Commit": git_commit,
             "Integrity Verdict": "PASS" if is_pass else "FAIL",
         }
     except Exception as e:
@@ -103,6 +105,7 @@ def audit_run(seed: int, method: str) -> dict:
             "No NaN/Inf": "FAIL",
             "Wall Clock (s)": 0.0,
             "Peak RAM (MB)": 0.0,
+            "Git Commit": "ERROR",
             "Integrity Verdict": f"FAIL ({str(e)})",
         }
 
