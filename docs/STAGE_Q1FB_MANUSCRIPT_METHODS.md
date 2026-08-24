@@ -63,7 +63,7 @@ $$\bar{\Delta} = \frac{1}{N} \sum_{i=1}^N \Delta_i^{\mathrm{terminal}} = \frac{1
 1. **Exact Two-Sided Permutation Sign-Flip Test:** Under the sharp null hypothesis $H_0: \mathbb{E}[\Delta_i] = 0$, we compute the exact permutation $p$-value by evaluating all $2^N = 1024$ possible sign flips across the exact sample magnitudes:
    $$p = \frac{1}{2^N} \sum_{\mathbf{s} \in \{-1, +1\}^N} \mathbb{I}\left( \left| \frac{1}{N} \sum_{i=1}^N s_i \Delta_i \right| \ge |\bar{\Delta}| \right)$$
 2. **Paired Percentile Bootstrap CI:** Two-sided 95% confidence intervals for $\bar{\Delta}$ are computed via $B = 10,000$ paired bootstrap resamples.
-3. **Budget Interaction Estimand:** $H_i = \Delta_i(125\mathrm{k}) - \Delta_i(10\mathrm{k})$ evaluates the longitudinal shift in paired advantage between early exploration and canonical maturity.
+3. **Budget Interaction Estimand:** $H_i = \Delta_i(125\mathrm{k}) - \Delta_i(10\mathrm{k})$ evaluates the longitudinal shift in paired advantage between early exploration and canonical maturity. Statistical testing on $\bar{H}$ uses exact sign-flip permutation tests, while the number of positive seeds ($H_i > 0$) is reported as a descriptive count.
 
 ---
 
@@ -71,13 +71,13 @@ $$\bar{\Delta} = \frac{1}{N} \sum_{i=1}^N \Delta_i^{\mathrm{terminal}} = \frac{1
 
 ### Table 1: Tri-Environment Confirmatory Results Summary ($N=10$ Paired Seeds per Environment)
 
-| Environment | Dynamic / Contact Character | Mean Terminal $\bar{\Delta}$ | $95\%$ Bootstrap CI | Paired Wins | Exact $p$-value | Budget Interaction $\bar{H}$ (95% CI) | Positive Shifts | Compute Overhead |
+| Environment | Dynamic / Contact Character | Mean Terminal $\bar{\Delta}$ (95% CI) | Paired Wins | $p_{\text{exact}}(\bar{\Delta})$ | Budget Shift $\bar{H}$ (95% CI) | $p_{\text{exact}}(\bar{H})$ | Positive Shifts ($H_i > 0$) | Compute Overhead |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Hopper-v4** | Contact-Truncated ($z < 0.7$) | **$+620.09$** | $[+485.66, +756.46]$ | **$10 / 10$** | $p = 0.001953$ | $+609.32$ ($[+265.39, +843.58]$) | $9 / 10$ ($p = 0.009766$) | $+5.1\%$ |
-| **Walker2d-v4** | Multi-Contact Truncated ($z \notin [0.8, 2.0]$) | **$+239.51$** | $[+133.51, +356.58]$ | **$10 / 10$** | $p = 0.001953$ | $+172.24$ ($[-3.20, +346.35]$) | $7 / 10$ ($p = 0.101562$) | $+4.7\%$ |
-| **HalfCheetah-v4** | Non-Terminating Locomotion | **$+3248.94$** | $[+1381.44, +5115.20]$ | **$10 / 10$** | $p = 0.001953$ | $+3108.80$ ($[+1274.87, +4930.62]$) | $7 / 10$ ($p = 0.015625$) | $+4.7\%$ |
+| **Hopper-v4** | Contact-Truncated ($z < 0.7$) | **$+620.09$** ($[+485.66, +756.46]$) | **$10 / 10$** | $0.001953$ | $+609.32$ ($[+265.39, +843.58]$) | $0.009766$ | $9 / 10$ | $+5.1\%$ |
+| **Walker2d-v4** | Multi-Contact Truncated ($z \notin [0.8, 2.0]$) | **$+239.51$** ($[+133.51, +356.58]$) | **$10 / 10$** | $0.001953$ | $+172.24$ ($[-3.20, +346.35]$) | $0.101562$ | $7 / 10$ | $+4.7\%$ |
+| **HalfCheetah-v4** | Non-Terminating Locomotion | **$+3248.94$** ($[+1381.44, +5115.20]$) | **$10 / 10$** | $0.001953$ | $+3108.80$ ($[+1274.87, +4930.62]$) | $0.015625$ | $7 / 10$ | $+4.7\%$ |
 
-*Statistical Reporting Standard:* Across three independently closed confirmatory cohorts, all 30 paired seed–environment comparisons favored VaGraM at the preregistered terminal endpoint. Each environment achieves the minimum attainable two-sided exact permutation $p$-value under $N=10$ ($p = 2/1024 = 0.001953$).
+*Statistical Reporting Standard:* Across three independently closed confirmatory cohorts, all 30 paired seed–environment comparisons favored VaGraM at the preregistered terminal endpoint. Each environment achieves the minimum attainable two-sided exact permutation $p$-value under $N=10$ ($p = 2/1024 = 0.001953$). $p$-values for budget shifts ($p_{\text{exact}}(\bar{H})$) correspond strictly to continuous permutation tests on $\bar{H}$, with positive shift counts reported as descriptive cohort metrics.
 
 ### Table 2: Complete 30-Seed Confirmatory Ledger ($\Delta_i = \bar{J}_i^{\mathrm{V}} - \bar{J}_i^{\mathrm{M}}$)
 
@@ -99,13 +99,14 @@ $$\bar{\Delta} = \frac{1}{N} \sum_{i=1}^N \Delta_i^{\mathrm{terminal}} = \frac{1
 ## 5. Mechanistic Synthesis & Core Scientific Claims
 
 ### 5.1 Primary Claim: Regime-Conditional Learning Utility
-> **Under a single fixed MBPO configuration without environment-specific retuning, VaGraM produced positive paired terminal-return differences over MLE for all 30 confirmatory seed–environment pairs across Hopper-v4, Walker2d-v4, and HalfCheetah-v4. The magnitude of the advantage varied substantially across environments and seeds, and the advantage generally increased with training budget, supporting the view that downstream learning utility is strongly regime dependent rather than an intrinsic property of a model-error metric.**
+> **Across three independently closed MuJoCo confirmatory cohorts, VaGraM produced positive paired terminal-return differences over MLE for all 30 seed–environment comparisons under a single fixed MBPO configuration without environment-specific retuning. Effect magnitudes varied substantially across environments and seeds, and the advantage was generally stronger at the mature training budget, supporting the conclusion that downstream learning utility is regime- and operator-conditional rather than an intrinsic property of model-error magnitude or decision relevance alone.**
 
-### 5.2 Regime Breakdown & Heterogeneity Across Environments
-1. **Contact-Truncated Environments (Hopper & Walker2d):** In environments subject to early catastrophic termination on posture tipping, standard MLE suffers from value-critical boundary prediction failures, collapsing rollouts prematurely. VaGraM stabilizes contact dynamics, achieving uniform positive shifts ($\bar{\Delta} = +620.09$ on Hopper, $+239.51$ on Walker2d).
-2. **Non-Terminating Velocity Tracking (HalfCheetah):** HalfCheetah exhibited strongly heterogeneous seed-level effects, ranging from $+7.41$ to $+6,605.47$, while all ten paired terminal differences remained positive.
-   - *High-Velocity Breakout Cluster ($5/10$ seeds: 144, 145, 146, 147, 150):* VaGraM achieved high-speed forward locomotion ($\bar{J}^{\mathrm{V}} \approx +5,700 \to +6,107$), while standard MLE remained trapped in sub-zero returns ($\bar{J}^{\mathrm{M}} \approx -317 \to -498$).
-   - *Sub-Zero Advantage Cluster ($5/10$ seeds: 142, 143, 148, 149, 151):* VaGraM consistently attained higher return than MLE, though neither policy broke into forward running before 125k steps.
+### 5.2 Mechanistic Interpretation & Heterogeneity Across Environments
+1. **Regime-Conditional Downstream Policy Returns:** At the mature training budget, value-aware dynamics learning yielded substantially larger downstream policy returns across all three environments. Together with the weaker and more heterogeneous low-budget results, this supports a regime-conditional interpretation of learning utility.
+2. **Contact-Truncated vs. Non-Terminating Tasks:** In contact-truncated tasks (Hopper, Walker2d), catastrophic termination penalizes boundary errors heavily, producing consistent positive terminal shifts ($\bar{\Delta} = +620.09$ and $+239.51$). In non-terminating tasks (HalfCheetah), seed effects are strongly bimodal:
+   - HalfCheetah exhibited strongly heterogeneous seed-level effects, ranging from $+7.41$ to $+6,605.47$, while all ten paired terminal differences remained positive.
+   - *High-Velocity Breakout Cluster ($5/10$ seeds: 144–147, 150):* VaGraM achieved high-speed forward locomotion ($\bar{J}^{\mathrm{V}} \approx +5,700 \to +6,107$), while standard MLE remained trapped in sub-zero returns ($\bar{J}^{\mathrm{M}} \approx -317 \to -498$).
+   - *Sub-Zero Advantage Cluster ($5/10$ seeds: 142, 143, 148, 149, 151):* VaGraM consistently attained higher return than MLE ($\Delta_i \in [+7.41, +329.50]$), though neither policy achieved runaway forward velocity by 125k steps.
 
 ---
 
