@@ -338,7 +338,7 @@ In continuous-state CartPole-v1 ($\mathcal{S} \subset \mathbb{R}^4, \mathcal{A} 
 
 To evaluate downstream learning utility under closed-loop multi-step policy optimization, we conduct a preregistered confirmatory replication comparing standard MLE against value-gradient weighted dynamics (VaGraM) under canonical Model-Based Policy Optimization (MBPO) \cite{janner2019trust, voelcker2022value}.
 
-\paragraph{Confirmatory Protocol & Experimental Symmetry.}
+\paragraph{Confirmatory Protocol \& Experimental Symmetry.}
 All experiments operate on Gymnasium v1.0 / MuJoCo 3.x under an audited canonical budget of $T = 125,000$ interaction steps. We evaluate three continuous-control locomotion tasks with distinct dynamical and contact characteristics:
 \begin{enumerate}
     \item \textbf{\texttt{Hopper-v4}} ($\mathcal{S} \subset \mathbb{R}^{11}, \mathcal{A} \subset \mathbb{R}^3$): Single-leg contact-truncated locomotion (early termination on torso height $z < 0.7$ or pitch $|\theta| > 0.2$).
@@ -346,7 +346,7 @@ All experiments operate on Gymnasium v1.0 / MuJoCo 3.x under an audited canonica
     \item \textbf{\texttt{HalfCheetah-v4}} ($\mathcal{S} \subset \mathbb{R}^{17}, \mathcal{A} \subset \mathbb{R}^6$): Planar non-terminating continuous contact locomotion (fixed 1,000 steps per episode).
 \end{enumerate}
 
-Both algorithmic branches are **strictly matched on all 21 architectural, optimization, rollout, and evaluation hyperparameters**: dynamics ensemble ($E=7$, elite 5, 4 layers $\times$ 200 units, Adam $\text{lr}=10^{-3}$), SAC policy agent ($G=20$ updates per step, $\text{lr}=3\times 10^{-4}$), rollout schedule $[20\mathrm{k}, 150\mathrm{k}, 1, 5]$, and deterministic evaluation across 25 periodic checkpoints (10 test episodes per checkpoint). 
+Both algorithmic branches are \textbf{strictly matched on all 21 architectural, optimization, rollout, and evaluation hyperparameters}: dynamics ensemble ($E=7$, elite 5, 4 layers $\times$ 200 units, Adam $\text{lr}=10^{-3}$), SAC policy agent ($G=20$ updates per step, $\text{lr}=3\times 10^{-4}$), rollout schedule $[20\mathrm{k}, 150\mathrm{k}, 1, 5]$, and deterministic evaluation across 25 periodic checkpoints (10 test episodes per checkpoint). 
 
 Evaluation utilizes a paired-seed cohort design ($N=10$ paired seeds, $[142, \dots, 151]$ per environment, 60 runs total). All runs passed a mandatory 100\% run-integrity audit verifying exactly 151,035 dynamics updates, 2,480,000 SAC updates, and 388,800 imagined rollouts.
 
@@ -410,7 +410,7 @@ Our theoretical and empirical investigations across discrete MDPs, finite-data w
     \item \textbf{Regime-Conditional Policy Advantage:} At the mature training budget (125k steps), value-aware dynamics learning yielded substantially larger downstream policy returns across all three tested MuJoCo environments. Together with the weaker and more heterogeneous low-budget results, this supports a regime-conditional interpretation of learning utility.
 \end{enumerate}
 
-\subsection{Explicit Methodological Scope Boundaries & Limitations}
+\subsection{Explicit Methodological Scope Boundaries \& Limitations}
 \label{subsec:methodological_limitations}
 
 To ensure precise scientific rigor, we explicitly demarcate the scope boundaries of our findings:
